@@ -40,13 +40,13 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Event Title <span class="text-red-500 dark:text-red-400">*</span></label>
                             <input type="text" name="title" value="{{ old('title', $event->title) }}" required
-                                class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors" placeholder="e.g. Developer Conference 2026">
+                                class="form-input-vercel px-4 py-3" placeholder="e.g. Developer Conference 2026">
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Description <span class="text-red-500 dark:text-red-400">*</span></label>
                             <textarea name="description" rows="5" required
-                                class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors placeholder-gray-400 dark:placeholder-gray-600" placeholder="Provide a detailed overview of what to expect...">{{ old('description', $event->description) }}</textarea>
+                                class="form-input-vercel px-4 py-3 placeholder-gray-400 dark:placeholder-gray-600" placeholder="Provide a detailed overview of what to expect...">{{ old('description', $event->description) }}</textarea>
                         </div>
                     </div>
 
@@ -57,12 +57,12 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Date <span class="text-red-500 dark:text-red-400">*</span></label>
                             <input type="date" name="date" value="{{ old('date', $event->date->format('Y-m-d')) }}" required
-                                class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors [color-scheme:light] dark:[color-scheme:dark]">
+                                class="form-input-vercel px-4 py-3 [color-scheme:light] dark:[color-scheme:dark]">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Time <span class="text-red-500 dark:text-red-400">*</span></label>
                             <input type="time" name="time" value="{{ old('time', $event->time) }}" required
-                                class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors [color-scheme:light] dark:[color-scheme:dark]">
+                                class="form-input-vercel px-4 py-3 [color-scheme:light] dark:[color-scheme:dark]">
                         </div>
                     </div>
 
@@ -73,7 +73,7 @@
                                 <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             </div>
                             <input type="text" name="location" value="{{ old('location', $event->location) }}" required
-                                class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] pl-10 pr-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors placeholder-gray-400 dark:placeholder-gray-600" placeholder="Venue name or address">
+                                class="form-input-vercel pl-10 pr-4 py-3 placeholder-gray-400 dark:placeholder-gray-600" placeholder="Venue name or address">
                         </div>
                     </div>
 
@@ -81,11 +81,11 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Total Capacity <span class="text-red-500 dark:text-red-400">*</span></label>
                             <input type="number" name="available_tickets" value="{{ old('available_tickets', $event->available_tickets) }}" min="0" required
-                                class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">
+                                class="form-input-vercel px-4 py-3">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Category <span class="text-red-500 dark:text-red-400">*</span></label>
-                            <select name="category_id" required class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors cursor-pointer">
+                            <select name="category_id" required class="form-input-vercel px-4 py-3 cursor-pointer">
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}" {{ old('category_id', $event->category_id) == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
@@ -97,12 +97,12 @@
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 transition-colors">Tags & Labels</label>
-                        <div class="flex flex-wrap gap-3 p-5 bg-gray-50 dark:bg-[#1A1A1A] rounded-xl border border-gray-100 dark:border-white/10 transition-colors">
+                        <div class="flex flex-wrap gap-3 p-5 bg-white/30 dark:bg-white/5 backdrop-blur-sm rounded-xl border border-gray-100 dark:border-white/10 transition-colors">
                             @foreach($tags as $tag)
                                 <label class="flex items-center gap-2.5 text-sm cursor-pointer hover:bg-white dark:hover:bg-[#222] px-3 py-1.5 rounded-md border border-transparent hover:border-gray-200 dark:hover:border-white/10 shadow-none hover:shadow-sm transition-all duration-200">
                                     <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
                                         {{ in_array($tag->id, old('tags', $selectedTags)) ? 'checked' : '' }}
-                                        class="w-4 h-4 rounded border-gray-300 dark:border-white/20 bg-white dark:bg-[#111] text-black shadow-sm focus:ring-black dark:focus:ring-white dark:focus:ring-offset-[#111] transition-colors cursor-pointer">
+                                        class="w-4 h-4 rounded border-gray-300 dark:border-white/20 bg-white/50 dark:bg-white/10 text-black shadow-sm focus:ring-black dark:focus:ring-white dark:focus:ring-offset-[#111] transition-colors cursor-pointer">
                                     <span class="font-medium text-gray-700 dark:text-gray-300 transition-colors">{{ $tag->name }}</span>
                                 </label>
                             @endforeach
@@ -121,7 +121,7 @@
                                 </div>
                             @endif
                             <div class="flex-grow w-full">
-                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 dark:border-white/20 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-[#1A1A1A] hover:bg-gray-100 dark:hover:bg-[#222] transition-colors">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 dark:border-white/20 border-dashed rounded-lg cursor-pointer bg-white/30 dark:bg-white/5 backdrop-blur-sm hover:bg-white/40 dark:hover:bg-white/10 transition-colors">
                                     <div class="flex flex-col items-center justify-center pt-5 pb-6">
                                         <svg class="w-8 h-8 mb-3 text-gray-400 dark:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                         <p class="mb-1 text-sm text-gray-500 dark:text-gray-400 font-semibold transition-colors">Click to upload or drag and drop</p>

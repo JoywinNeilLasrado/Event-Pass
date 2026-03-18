@@ -21,12 +21,12 @@
 
             <div class="card overflow-hidden shadow-md">
                 <!-- Hero Image Section -->
-                <div class="w-full h-72 sm:h-[400px] relative bg-[#f3f4f6] dark:bg-[#111111] flex items-center justify-center border-b border-gray-100 dark:border-white/10 transition-colors">
+                <div class="w-full h-72 sm:h-[400px] relative bg-white/30 dark:bg-white/5 backdrop-blur-sm flex items-center justify-center border-b border-gray-100 dark:border-white/10 transition-colors">
                     @if($event->poster_image)
                         <img src="{{ Storage::url($event->poster_image) }}" alt="{{ $event->title }}" class="w-full h-full object-cover">
                     @else
-                        <div class="absolute inset-0 bg-gradient-to-tr from-[#f3f4f6] dark:from-[#111] to-[#e5e7eb] dark:to-[#222]"></div>
-                        <span class="relative text-7xl opacity-20 dark:opacity-10 mix-blend-multiply dark:mix-blend-screen transition-opacity">🎟️</span>
+                        <div class="absolute inset-0 bg-gradient-to-tr from-white/20 dark:from-white/10 to-transparent"></div>
+                        <span class="relative text-7xl opacity-40 mix-blend-overlay transition-opacity">🎟️</span>
                     @endif
 
                     <div class="absolute top-6 left-6 flex flex-wrap gap-2">
@@ -54,12 +54,12 @@
 
                         <!-- Sidebar Metadata (Right Column) -->
                         <div class="space-y-8">
-                            <div class="card bg-[#FAFAFA] dark:bg-[#1A1A1A] border border-gray-100 dark:border-white/10 p-6 shadow-sm transition-colors">
+                            <div class="card border border-gray-100 dark:border-white/10 p-6 shadow-sm transition-colors">
                                 <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-6 transition-colors">Event Details</h3>
                                 
                                 <div class="space-y-5">
                                     <div class="flex items-start">
-                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-4 shadow-sm transition-colors">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white/50 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-4 shadow-sm transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                         </div>
                                         <div class="pt-0.5">
@@ -69,7 +69,7 @@
                                     </div>
 
                                     <div class="flex items-start">
-                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-4 shadow-sm transition-colors">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white/50 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-4 shadow-sm transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                         </div>
                                         <div class="pt-0.5">
@@ -78,7 +78,7 @@
                                     </div>
 
                                     <div class="flex items-start">
-                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-4 shadow-sm transition-colors">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white/50 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-4 shadow-sm transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                                         </div>
                                         <div class="pt-0.5">
@@ -88,7 +88,7 @@
                                     </div>
                                     
                                     <div class="flex items-start">
-                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-4 shadow-sm transition-colors">
+                                        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white/50 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-4 shadow-sm transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
                                         </div>
                                         <div class="pt-0.5">
@@ -112,7 +112,7 @@
                                             <form action="{{ route('events.destroy', $event) }}" method="POST" class="flex" onsubmit="return confirm('Soft-delete this event? It can be restored later.')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="inline-flex items-center justify-center bg-white dark:bg-[#1A1A1A] text-red-600 dark:text-red-500 border border-red-200 dark:border-red-900 hover:border-red-300 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-[#222] transition-colors duration-200 px-4 rounded-lg font-medium shadow-sm active:translate-y-px focus:outline-none">
+                                                <button type="submit" class="inline-flex items-center justify-center bg-white/40 dark:bg-white/5 backdrop-blur-md text-red-600 dark:text-red-500 border border-red-200 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-white/10 transition-colors duration-200 px-4 rounded-lg font-medium shadow-sm active:translate-y-px focus:outline-none">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                                 </button>
                                             </form>
@@ -139,12 +139,12 @@
                                             <button type="submit" class="btn-vercel w-full text-lg py-4 shadow-lg shadow-black/10">Reserve a Spot</button>
                                         </form>
                                     @else
-                                        <div class="bg-gray-100 dark:bg-[#222] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 rounded-lg p-4 text-center font-semibold transition-colors">
+                                        <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 rounded-lg p-4 text-center font-semibold transition-colors">
                                             Sold Out
                                         </div>
                                     @endif
                                 @else
-                                    <div class="card bg-[#FAFAFA] dark:bg-[#1A1A1A] border-gray-100 dark:border-white/10 p-6 text-center shadow-none mb-0 transition-colors">
+                                    <div class="card border-gray-100 dark:border-white/10 p-6 text-center shadow-none mb-0 transition-colors">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white mb-4 transition-colors">Join the experience.</p>
                                         <a href="{{ route('login') }}" class="btn-vercel w-full">Sign in to Reserve</a>
                                     </div>

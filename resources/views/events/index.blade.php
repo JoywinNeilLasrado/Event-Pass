@@ -36,12 +36,12 @@
                     @foreach($events as $event)
                         <div class="group relative card flex flex-col h-full hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5 hover:-translate-y-1 transition-all duration-300">
                             <!-- Image Header -->
-                            <div class="w-full aspect-[16/9] relative overflow-hidden border-b border-gray-100 dark:border-white/10 bg-[#f3f4f6] dark:bg-[#1A1A1A] flex items-center justify-center transition-colors">
+                            <div class="w-full aspect-[16/9] relative overflow-hidden border-b border-gray-100 dark:border-white/10 bg-white/30 dark:bg-white/5 flex items-center justify-center transition-colors">
                                 @if($event->poster_image)
                                     <img src="{{ Storage::url($event->poster_image) }}" alt="{{ $event->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 @else
-                                    <div class="absolute inset-0 bg-gradient-to-tr from-[#f3f4f6] dark:from-[#1A1A1A] to-[#e5e7eb] dark:to-[#222] transition-colors"></div>
-                                    <span class="relative text-5xl opacity-20 mix-blend-multiply dark:mix-blend-screen transition-transform duration-500 group-hover:scale-110">🎟️</span>
+                                    <div class="absolute inset-0 bg-gradient-to-tr from-white/20 dark:from-white/10 to-transparent transition-colors"></div>
+                                    <span class="relative text-5xl opacity-40 mix-blend-overlay transition-transform duration-500 group-hover:scale-110">🎟️</span>
                                 @endif
                                 
                                 <!-- Category Badge Overlay -->
