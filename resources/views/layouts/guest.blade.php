@@ -25,13 +25,13 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen flex flex-col justify-center items-center pt-6 sm:pt-0">
-            <div>
+            <div class="z-10 relative">
                 <a href="/">
-                    <h1 class="font-extrabold text-4xl tracking-tighter text-gray-900 dark:text-white transition-colors duration-300">EventPass.</h1>
+                    <h1 class="font-extrabold text-5xl tracking-tighter text-gray-900 dark:text-white transition-colors duration-300 drop-shadow-md">EventPass.</h1>
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-10 py-10 card">
+            <div class="w-full sm:max-w-md mt-8 px-10 py-10 card z-10 relative">
                 {{ $slot }}
             </div>
         </div>

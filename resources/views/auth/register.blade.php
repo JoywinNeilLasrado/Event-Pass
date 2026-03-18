@@ -6,7 +6,7 @@
         <div>
             <label for="name" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Name</label>
             <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name"
-                   class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">
+                   class="form-input-vercel px-4 py-3">
             <x-input-error :messages="$errors->get('name')" class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" />
         </div>
 
@@ -14,7 +14,7 @@
         <div>
             <label for="email" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Email</label>
             <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username"
-                   class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">
+                   class="form-input-vercel px-4 py-3">
             <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" />
         </div>
 
@@ -22,7 +22,7 @@
         <div>
             <label for="password" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Password</label>
             <input id="password" type="password" name="password" required autocomplete="new-password"
-                   class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">
+                   class="form-input-vercel px-4 py-3">
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" />
         </div>
 
@@ -30,7 +30,7 @@
         <div>
             <label for="password_confirmation" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Confirm Password</label>
             <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
-                   class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">
+                   class="form-input-vercel px-4 py-3">
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" />
         </div>
 

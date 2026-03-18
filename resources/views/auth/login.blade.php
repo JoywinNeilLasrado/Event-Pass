@@ -9,7 +9,7 @@
         <div>
             <label for="email" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Email</label>
             <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"
-                   class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">
+                   class="form-input-vercel px-4 py-3">
             <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" />
         </div>
 
@@ -17,15 +17,15 @@
         <div>
             <label for="password" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Password</label>
             <input id="password" type="password" name="password" required autocomplete="current-password"
-                   class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">
+                   class="form-input-vercel px-4 py-3">
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" />
         </div>
 
         <!-- Remember Me -->
         <div class="flex items-center justify-between mt-4">
             <label for="remember_me" class="inline-flex items-center group cursor-pointer">
-                <input id="remember_me" type="checkbox" name="remember" class="w-4 h-4 rounded border-gray-300 dark:border-white/20 dark:bg-[#111] text-black shadow-sm focus:ring-black dark:focus:ring-white dark:focus:ring-offset-[#111] cursor-pointer">
-                <span class="ml-2 text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Remember me</span>
+                <input id="remember_me" type="checkbox" name="remember" class="w-4 h-4 rounded border border-white/40 dark:border-white/20 bg-white/30 dark:bg-black/30 backdrop-blur-md text-gray-900 dark:text-white shadow-sm focus:ring-black/20 dark:focus:ring-white/20 cursor-pointer transition-colors">
+                <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Remember me</span>
             </label>
 
             @if (Route::has('password.request'))

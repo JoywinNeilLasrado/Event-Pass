@@ -68,7 +68,7 @@
                 @else
                     <div class="divide-y divide-gray-50 dark:divide-white/5 transition-colors">
                         @foreach($myEvents as $event)
-                            <div class="p-6 transition-colors hover:bg-gray-50 dark:hover:bg-white/5 @if($event->deleted_at) opacity-60 grayscale @endif">
+                            <div class="p-6 transition-colors hover:bg-white/30 dark:hover:bg-black/30 @if($event->deleted_at) opacity-60 grayscale @endif">
                                 <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-3 flex-wrap mb-1">
@@ -79,7 +79,7 @@
                                             @if($event->deleted_at)
                                                 <span class="text-[10px] bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-md px-2 py-0.5 font-bold uppercase tracking-widest shadow-sm transition-colors">Deleted</span>
                                             @endif
-                                            <span class="text-[10px] bg-gray-100 dark:bg-[#222] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 rounded-md px-2 py-0.5 font-bold uppercase tracking-widest shadow-sm transition-colors">{{ $event->category->name }}</span>
+                                            <span class="text-[10px] bg-white/50 dark:bg-black/50 backdrop-blur-sm border border-white/50 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-0.5 font-bold uppercase tracking-widest shadow-sm transition-colors">{{ $event->category->name }}</span>
                                         </div>
                                         
                                         <div class="flex items-center gap-4 text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 transition-colors">
@@ -98,7 +98,7 @@
                                                 </p>
                                                 <div class="flex flex-wrap gap-2">
                                                     @foreach($event->bookings as $booking)
-                                                        <div class="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-white/10 rounded-full pl-1 pr-3 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 shadow-sm transition-colors">
+                                                        <div class="flex items-center gap-2 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/40 dark:border-white/10 rounded-full pl-1 pr-3 py-1 text-xs font-semibold text-gray-800 dark:text-gray-200 shadow-sm transition-colors">
                                                             <span class="w-5 h-5 rounded-full bg-gray-900 dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-[10px] uppercase flex-shrink-0 transition-colors">
                                                                 {{ substr($booking->user->name, 0, 1) }}
                                                             </span>
@@ -144,7 +144,7 @@
                     <div class="divide-y divide-gray-50 dark:divide-white/5 transition-colors">
                         @foreach($myBookings as $booking)
                             @php $event = $booking->event; @endphp
-                            <div class="p-6 transition-colors hover:bg-gray-50 dark:hover:bg-white/5">
+                            <div class="p-6 transition-colors hover:bg-white/30 dark:hover:bg-black/30">
                                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                     <div>
                                         <div class="flex items-center gap-3 flex-wrap mb-1">
@@ -156,7 +156,7 @@
                                                    class="font-bold text-lg text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors tracking-tight">
                                                     {{ $event->title }}
                                                 </a>
-                                                <span class="text-[10px] bg-gray-100 dark:bg-[#222] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 rounded-md px-2 py-0.5 font-bold uppercase tracking-widest shadow-sm transition-colors">{{ $event->category->name }}</span>
+                                                <span class="text-[10px] bg-white/50 dark:bg-black/50 backdrop-blur-sm border border-white/50 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-md px-2 py-0.5 font-bold uppercase tracking-widest shadow-sm transition-colors">{{ $event->category->name }}</span>
                                             @endif
                                         </div>
                                         

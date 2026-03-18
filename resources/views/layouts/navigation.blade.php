@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="sticky top-0 z-50 bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10 transition-colors duration-300">
+<nav x-data="{ open: false }" class="sticky top-0 z-50 bg-white/30 dark:bg-black/30 backdrop-blur-2xl border-b border-white/40 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.05)] transition-colors duration-300">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -86,7 +86,7 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-white border-b border-gray-200 shadow-sm transition-all duration-200 ease-in-out">
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-white/40 dark:bg-black/40 backdrop-blur-xl border-b border-white/40 dark:border-white/10 shadow-lg transition-all duration-200 ease-in-out">
         <div class="pt-2 pb-3 space-y-1">
             <a href="{{ route('events.index') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('events.index') ? 'border-black text-black font-bold bg-gray-50' : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300' }} text-base font-medium transition duration-150 ease-in-out">
                 Events

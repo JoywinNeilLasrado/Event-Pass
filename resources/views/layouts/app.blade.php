@@ -37,9 +37,9 @@
                 {{ $slot }}
             </main>
             
-            <footer class="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#111111] py-12 mt-auto transition-colors duration-300">
-                <div class="max-w-7xl mx-auto px-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                    &copy; {{ date('Y') }} Eventpass. Built with premium design standards.
+            <footer class="border-t border-white/20 dark:border-white/10 bg-white/30 dark:bg-black/30 backdrop-blur-xl py-12 mt-auto text-center text-sm text-gray-700 dark:text-gray-400">
+                <div class="max-w-7xl mx-auto px-6">
+                    &copy; {{ date('Y') }} Eventpass. Built with premium glassmorphism design.
                 </div>
             </footer>
         </div>
