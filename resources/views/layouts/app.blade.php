@@ -9,8 +9,17 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- Dark Mode Checker -->
+        <script>
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        </script>
     </head>
-    <body class="font-sans antialiased bg-[#FAFAFA] text-[#111827]">
+    <body class="font-sans antialiased">
         <div class="min-h-screen flex flex-col">
             @include('layouts.navigation')
 
@@ -28,8 +37,8 @@
                 {{ $slot }}
             </main>
             
-            <footer class="border-t border-gray-200 bg-white py-12 mt-auto">
-                <div class="max-w-7xl mx-auto px-6 text-center text-sm text-gray-500">
+            <footer class="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#111111] py-12 mt-auto transition-colors duration-300">
+                <div class="max-w-7xl mx-auto px-6 text-center text-sm text-gray-500 dark:text-gray-400">
                     &copy; {{ date('Y') }} Eventpass. Built with premium design standards.
                 </div>
             </footer>

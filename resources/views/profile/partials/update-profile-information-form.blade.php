@@ -1,11 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Profile Information') }}
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight transition-colors">
+            Profile Information
         </h2>
-
-        <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+        <p class="mt-1 text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors">
+            Update your account's profile information and email address.
         </p>
     </header>
 
@@ -13,34 +12,34 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" enctype="multipart/form-data">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-5" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
         <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            <label for="name" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Name</label>
+            <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name"
+                   class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">
+            <x-input-error class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" :messages="$errors->get('name')" />
         </div>
 
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            <label for="email" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Email</label>
+            <input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" required autocomplete="username"
+                   class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">
+            <x-input-error class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800">
-                        {{ __('Your email address is unverified.') }}
-
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            {{ __('Click here to re-send the verification email.') }}
+                    <p class="text-sm mt-3 font-semibold text-gray-800 dark:text-gray-300 transition-colors">
+                        Your email address is unverified.
+                        <button form="send-verification" class="underline text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                            Click here to re-send the verification email.
                         </button>
                     </p>
-
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600">
-                            {{ __('A new verification link has been sent to your email address.') }}
+                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400 transition-colors">
+                            A new verification link has been sent to your email address.
                         </p>
                     @endif
                 </div>
@@ -49,36 +48,31 @@
 
         {{-- Bio --}}
         <div>
-            <x-input-label for="bio" :value="__('Bio')" />
+            <label for="bio" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Bio</label>
             <textarea id="bio" name="bio" rows="3"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('bio', $user->bio) }}</textarea>
-            <x-input-error class="mt-2" :messages="$errors->get('bio')" />
+                class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors">{{ old('bio', $user->bio) }}</textarea>
+            <x-input-error class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" :messages="$errors->get('bio')" />
         </div>
 
         {{-- Profile Picture --}}
         <div>
-            <x-input-label for="profile_picture" :value="__('Profile Picture')" />
+            <label for="profile_picture" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Profile Picture</label>
             @if ($user->profile_picture)
-                <div class="mt-2 mb-2">
-                    <img src="{{ Storage::url($user->profile_picture) }}" alt="Profile" class="h-20 w-20 rounded-full object-cover">
+                <div class="mt-2 mb-3">
+                    <img src="{{ Storage::url($user->profile_picture) }}" alt="Profile" class="h-20 w-20 rounded-full object-cover border border-gray-200 dark:border-white/10 shadow-sm transition-colors">
                 </div>
             @endif
             <input id="profile_picture" name="profile_picture" type="file" accept="image/*"
-                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-            <x-input-error class="mt-2" :messages="$errors->get('profile_picture')" />
+                class="block w-full text-sm font-medium text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-gray-100 dark:file:bg-[#222] file:text-gray-600 dark:file:text-gray-300 hover:file:bg-gray-200 dark:hover:file:bg-[#333] hover:file:text-black dark:hover:file:text-white transition-colors cursor-pointer">
+            <x-input-error class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" :messages="$errors->get('profile_picture')" />
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <div class="flex items-center gap-4 pt-2">
+            <button type="submit" class="btn-vercel px-6 py-2.5">Save</button>
 
             @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
-                >{{ __('Saved.') }}</p>
+                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
+                   class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest transition-colors">Saved.</p>
             @endif
         </div>
     </form>
