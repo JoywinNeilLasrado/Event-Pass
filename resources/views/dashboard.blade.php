@@ -18,21 +18,21 @@
 
             {{-- ── STATS ROW ── --}}
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <div class="bg-white rounded-2xl shadow-sm p-6 flex items-center gap-4">
+                <div class="card p-6 flex items-center gap-4">
                     <div class="text-4xl">🗓️</div>
                     <div>
                         <p class="text-2xl font-bold text-gray-800">{{ $stats['events_created'] }}</p>
                         <p class="text-sm text-gray-500">Events Created</p>
                     </div>
                 </div>
-                <div class="bg-white rounded-2xl shadow-sm p-6 flex items-center gap-4">
+                <div class="card p-6 flex items-center gap-4">
                     <div class="text-4xl">🎫</div>
                     <div>
                         <p class="text-2xl font-bold text-gray-800">{{ $stats['tickets_booked'] }}</p>
                         <p class="text-sm text-gray-500">Tickets Booked by You</p>
                     </div>
                 </div>
-                <div class="bg-white rounded-2xl shadow-sm p-6 flex items-center gap-4">
+                <div class="card p-6 flex items-center gap-4">
                     <div class="text-4xl">👥</div>
                     <div>
                         <p class="text-2xl font-bold text-gray-800">{{ $stats['total_attendees'] }}</p>
@@ -42,10 +42,10 @@
             </div>
 
             {{-- ── MY EVENTS (with Attendees) ── --}}
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="card overflow-hidden">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <h3 class="text-lg font-semibold text-gray-800">🗓️ My Events</h3>
-                    <a href="{{ route('events.create') }}" class="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">+ New Event</a>
+                    <a href="{{ route('events.create') }}" class="btn-vercel text-sm px-4 py-2">+ New Event</a>
                 </div>
 
                 @if($myEvents->isEmpty())
@@ -114,7 +114,7 @@
             </div>
 
             {{-- ── MY BOOKINGS ── --}}
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div class="card overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100">
                     <h3 class="text-lg font-semibold text-gray-800">🎟️ My Tickets</h3>
                 </div>

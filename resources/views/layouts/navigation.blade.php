@@ -1,11 +1,11 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('events.index') }}" class="text-indigo-600 font-bold text-lg">
+                    <a href="{{ route('events.index') }}" class="text-black font-extrabold text-xl tracking-tight">
                         🎟️ EventPass
                     </a>
                 </div>
@@ -62,7 +62,7 @@
                 @else
                     <!-- Guest Links -->
                     <a href="{{ route('login') }}" class="text-sm text-gray-600 hover:text-gray-900 mr-4">Log in</a>
-                    <a href="{{ route('register') }}" class="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">Register</a>
+                    <a href="{{ route('register') }}" class="btn-vercel text-sm px-4 py-2">Register</a>
                 @endauth
             </div>
 

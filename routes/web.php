@@ -8,7 +8,7 @@ use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('events.index');
+    return view('welcome');
 });
 
 use App\Http\Controllers\DashboardController;
