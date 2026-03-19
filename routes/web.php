@@ -17,6 +17,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/scan', function () {
+    return view('scan');
+})->middleware('auth')->name('scan');
+
 // --- Event Routes ---
 // IMPORTANT: 'create' must come BEFORE '{event}' to avoid route conflict
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
@@ -46,7 +50,12 @@ Route::middleware('auth')->group(function () {
     // Bookings
     Route::post('/events/{event}/book', [BookingController::class, 'store'])->name('bookings.store');
     Route::delete('/events/{event}/book', [BookingController::class, 'destroy'])->name('bookings.destroy');
+    Route::get('/events/{event}/ticket', [BookingController::class, 'downloadTicket'])->name('bookings.ticket');
 });
+
+// Ticket Verification (Public but protected by Signed URL)
+Route::get('/tickets/verify/{booking}', [BookingController::class, 'verifyTicket'])->name('tickets.verify')->middleware('signed');
+Route::post('/tickets/checkin/{booking}', [BookingController::class, 'checkInTicket'])->name('tickets.checkin')->middleware('auth');
 
 // --- API Resource Route ---
 Route::get('/api/events', function () {

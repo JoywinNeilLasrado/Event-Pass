@@ -19,6 +19,9 @@
                         <a href="{{ route('dashboard') }}" class="text-sm font-semibold transition-colors duration-200 {{ request()->routeIs('dashboard') ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white' }}">
                             Dashboard
                         </a>
+                        <a href="{{ route('scan') }}" class="text-sm font-semibold transition-colors duration-200 {{ request()->routeIs('scan') ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white' }}">
+                            Scan Tickets
+                        </a>
                         @if(Auth::user()->is_admin)
                             <a href="{{ route('admin.dashboard') }}" class="text-sm font-semibold transition-colors duration-200 {{ request()->routeIs('admin.*') ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white' }}">
                                 Admin
@@ -94,6 +97,9 @@
             @auth
                 <a href="{{ route('dashboard') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('dashboard') ? 'border-black text-black font-bold bg-gray-50' : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300' }} text-base font-medium transition duration-150 ease-in-out">
                     Dashboard
+                </a>
+                <a href="{{ route('scan') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('scan') ? 'border-black text-black font-bold bg-gray-50' : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300' }} text-base font-medium transition duration-150 ease-in-out">
+                    Scan Tickets
                 </a>
                 @if(Auth::user()->is_admin)
                     <a href="{{ route('admin.dashboard') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('admin.*') ? 'border-black text-black font-bold bg-gray-50' : 'border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300' }} text-base font-medium transition duration-150 ease-in-out">
