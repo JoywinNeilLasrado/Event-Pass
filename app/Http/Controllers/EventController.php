@@ -36,9 +36,14 @@ class EventController extends Controller
         }
 
         $data['user_id'] = auth()->id();
+        $data['available_tickets'] = collect($data['tickets'])->sum('capacity');
 
         $event = Event::create($data);
         $event->tags()->sync($request->input('tags', []));
+
+        foreach ($data['tickets'] as $ticketData) {
+            $event->ticketTypes()->create($ticketData);
+        }
 
         return redirect()->route('events.show', $event)
             ->with('success', 'Event created successfully!');
@@ -46,7 +51,7 @@ class EventController extends Controller
 
     public function show(Event $event)
     {
-        $event->load(['category', 'user', 'tags', 'bookings']);
+        $event->load(['category', 'user', 'tags', 'bookings', 'ticketTypes']);
         $hasBooked = auth()->check()
             ? $event->bookings()->where('user_id', auth()->id())->exists()
             : false;
@@ -72,8 +77,33 @@ class EventController extends Controller
             $data['poster_image'] = $request->file('poster_image')->store('posters', 'public');
         }
 
+        $data['available_tickets'] = collect($data['tickets'])->sum('capacity');
         $event->update($data);
         $event->tags()->sync($request->input('tags', []));
+
+        $providedIds = [];
+        foreach ($data['tickets'] as $ticketData) {
+            if (isset($ticketData['id'])) {
+                $providedIds[] = $ticketData['id'];
+                $event->ticketTypes()->where('id', $ticketData['id'])->update([
+                    'name' => $ticketData['name'],
+                    'price' => $ticketData['price'],
+                    'capacity' => $ticketData['capacity'],
+                    'description' => $ticketData['description'] ?? null,
+                ]);
+            } else {
+                $newTier = $event->ticketTypes()->create($ticketData);
+                $providedIds[] = $newTier->id;
+            }
+        }
+
+        // Delete removed tiers ONLY if they have no bookings
+        $typesToDelete = $event->ticketTypes()->whereNotIn('id', $providedIds)->get();
+        foreach ($typesToDelete as $type) {
+            if ($type->bookings()->count() == 0) {
+                $type->delete();
+            }
+        }
 
         return redirect()->route('events.show', $event)
             ->with('success', 'Event updated successfully!');

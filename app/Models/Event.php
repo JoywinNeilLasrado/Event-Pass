@@ -47,4 +47,14 @@ class Event extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function ticketTypes(): HasMany
+    {
+        return $this->hasMany(TicketType::class);
+    }
+
+    public function getRemainingAttribute()
+    {
+        return $this->available_tickets - $this->bookings()->count();
+    }
 }

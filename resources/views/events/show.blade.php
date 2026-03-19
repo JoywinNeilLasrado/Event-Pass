@@ -92,8 +92,8 @@
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
                                         </div>
                                         <div class="pt-0.5">
-                                            <p class="text-sm font-semibold {{ $event->available_tickets > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400' }} transition-colors">
-                                                {{ $event->available_tickets }} Tickets Available
+                                            <p class="text-sm font-semibold {{ $event->remaining > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400' }} transition-colors">
+                                                {{ $event->remaining }} Tickets Available
                                             </p>
                                             @if($event->bookings->count() > 0)
                                                 <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 transition-colors">{{ $event->bookings->count() }} people attending</p>
@@ -133,11 +133,43 @@
                                                 Cancel reservation
                                             </button>
                                         </form>
-                                    @elseif($event->available_tickets > 0)
-                                        <form action="{{ route('bookings.store', $event) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn-vercel w-full text-lg py-4 shadow-lg shadow-black/10">Reserve a Spot</button>
-                                        </form>
+                                    @elseif($event->remaining > 0)
+                                        <div class="space-y-4 mt-2">
+                                            <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-3 tracking-tight">Select Ticket Package</h4>
+                                            @foreach($event->ticketTypes as $tier)
+                                                <div class="p-5 bg-white/40 dark:bg-black/40 backdrop-blur-md border {{ $tier->remaining > 0 ? 'border-gray-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/50' : 'border-gray-100 dark:border-white/5 opacity-60' }} rounded-xl shadow-sm transition-all group relative overflow-hidden">
+                                                    <div class="flex justify-between items-start mb-2">
+                                                        <div>
+                                                            <h5 class="font-bold text-gray-900 dark:text-white tracking-tight text-lg">{{ $tier->name }}</h5>
+                                                            @if($tier->description)
+                                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">{{ $tier->description }}</p>
+                                                            @endif
+                                                        </div>
+                                                        <div class="text-right flex-shrink-0 ml-4">
+                                                            <p class="font-extrabold text-2xl text-gray-900 dark:text-white tracking-tight">{{ $tier->price > 0 ? '$' . number_format($tier->price, 2) : 'FREE' }}</p>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="mt-5 flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-4">
+                                                        @if($tier->remaining > 0)
+                                                            <span class="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest bg-green-50 dark:bg-green-900/30 px-2.5 py-1 rounded-md shadow-sm">
+                                                                {{ $tier->remaining }} Tickets Left
+                                                            </span>
+                                                            <form action="{{ route('bookings.store', $event) }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="ticket_type_id" value="{{ $tier->id }}">
+                                                                <button type="submit" class="btn-vercel text-sm px-6 py-2 shadow-md hover:-translate-y-0.5 transition-transform">Select</button>
+                                                            </form>
+                                                        @else
+                                                            <span class="text-[10px] font-bold text-red-500 dark:text-red-400 uppercase tracking-widest bg-red-50 dark:bg-red-900/30 px-2.5 py-1 rounded-md shadow-sm">
+                                                                Sold Out
+                                                            </span>
+                                                            <button disabled type="button" class="btn-vercel-secondary text-sm px-6 py-2 opacity-50 cursor-not-allowed">Unavailable</button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>>
                                     @else
                                         <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 rounded-lg p-4 text-center font-semibold transition-colors">
                                             Sold Out

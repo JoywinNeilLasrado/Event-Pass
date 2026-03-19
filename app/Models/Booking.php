@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Booking extends Model
 {
-    protected $fillable = ['user_id', 'event_id', 'is_checked_in'];
+    protected $fillable = ['user_id', 'event_id', 'is_checked_in', 'ticket_type_id'];
 
     public function user(): BelongsTo
     {
@@ -17,5 +17,10 @@ class Booking extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function ticketType(): BelongsTo
+    {
+        return $this->belongsTo(TicketType::class);
     }
 }

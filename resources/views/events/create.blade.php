@@ -78,11 +78,6 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Total Capacity <span class="text-red-500 dark:text-red-400">*</span></label>
-                            <input type="number" name="available_tickets" value="{{ old('available_tickets', 50) }}" min="1" required
-                                class="form-input-vercel px-4 py-3">
-                        </div>
-                        <div>
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Category <span class="text-red-500 dark:text-red-400">*</span></label>
                             <select name="category_id" required class="form-input-vercel px-4 py-3 cursor-pointer">
                                 <option value="">Select a category</option>
@@ -94,6 +89,68 @@
                             </select>
                         </div>
                     </div>
+
+                    <hr class="border-gray-100 dark:border-white/10 transition-colors my-8">
+
+                    <!-- Ticket Packages Group -->
+                    <div x-data="ticketPackages()">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="text-lg font-bold text-gray-900 dark:text-gray-100 transition-colors">Ticket Packages <span class="text-red-500 dark:text-red-400">*</span></h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Define single or multiple pricing tiers for your event.</p>
+                            </div>
+                            <button type="button" @click="addPackage()" class="btn-vercel-secondary text-xs px-4 py-2 flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-black/50 shadow-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-900">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Add Tier
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <template x-for="(pkg, index) in packages" :key="index">
+                                <div class="p-6 bg-white/30 dark:bg-white/5 backdrop-blur-sm rounded-xl border border-gray-100 dark:border-white/10 relative shadow-sm transition-colors group">
+                                    <button type="button" @click="removePackage(index)" x-show="packages.length > 1" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors bg-white dark:bg-neutral-800 rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 focus:opacity-100">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    </button>
+                                    
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-5 pr-8">
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5">Package Name</label>
+                                            <input type="text" :name="`tickets[${index}][name]`" x-model="pkg.name" required class="form-input-vercel px-4 py-2.5 text-sm" placeholder="e.g. VIP">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5">Price ($)</label>
+                                            <input type="number" step="0.01" :name="`tickets[${index}][price]`" x-model="pkg.price" required class="form-input-vercel px-4 py-2.5 text-sm" placeholder="0.00 for Free">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5">Capacity</label>
+                                            <input type="number" :name="`tickets[${index}][capacity]`" x-model="pkg.capacity" required class="form-input-vercel px-4 py-2.5 text-sm" placeholder="e.g. 50">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5">Description (Optional)</label>
+                                        <input type="text" :name="`tickets[${index}][description]`" x-model="pkg.description" class="form-input-vercel px-4 py-2.5 text-sm" placeholder="What does this ticket include?">
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.addEventListener('alpine:init', () => {
+                            Alpine.data('ticketPackages', () => ({
+                                packages: [
+                                    { name: 'General Admission', price: '0', capacity: '50', description: '' }
+                                ],
+                                addPackage() {
+                                    this.packages.push({ name: '', price: '', capacity: '', description: '' });
+                                },
+                                removePackage(index) {
+                                    this.packages.splice(index, 1);
+                                }
+                            }))
+                        })
+                    </script>
+
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 transition-colors">Tags & Labels</label>

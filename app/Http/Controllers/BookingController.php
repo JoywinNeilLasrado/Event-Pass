@@ -14,20 +14,29 @@ class BookingController extends Controller
 {
     public function store(Request $request, Event $event)
     {
+        $request->validate([
+            'ticket_type_id' => 'required|exists:ticket_types,id'
+        ]);
+
         $alreadyBooked = $event->bookings()->where('user_id', auth()->id())->exists();
         if ($alreadyBooked) {
             return back()->with('error', 'You have already booked a ticket for this event.');
         }
 
-        $updated = DB::transaction(function () use ($event) {
-            $event = Event::lockForUpdate()->find($event->id);
+        $ticketType = $event->ticketTypes()->findOrFail($request->ticket_type_id);
 
-            if ($event->available_tickets <= 0) {
+        $updated = DB::transaction(function () use ($event, $ticketType) {
+            $event = Event::lockForUpdate()->find($event->id);
+            $ticketType = \App\Models\TicketType::lockForUpdate()->find($ticketType->id);
+
+            if ($event->remaining <= 0 || $ticketType->remaining <= 0) {
                 return false;
             }
 
-            $event->decrement('available_tickets');
-            $event->bookings()->create(['user_id' => auth()->id()]);
+            $event->bookings()->create([
+                'user_id' => auth()->id(),
+                'ticket_type_id' => $ticketType->id
+            ]);
 
             return true;
         });
@@ -47,9 +56,8 @@ class BookingController extends Controller
             return back()->with('error', 'You do not have a booking for this event.');
         }
 
-        DB::transaction(function () use ($booking, $event) {
+        DB::transaction(function () use ($booking) {
             $booking->delete();
-            $event->increment('available_tickets');
         });
 
         return back()->with('success', 'Your ticket has been cancelled and the seat has been returned. 🔓');

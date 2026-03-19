@@ -25,12 +25,21 @@
         <div class="ticket-wrapper">
             <div class="ticket-header">
                 <h1>{{ $event->title }}</h1>
-                <p>EventPass Official Ticket</p>
+                @if($booking->ticketType)
+                    <p style="color: #ecc94b; font-weight: bold; font-size: 16px; letter-spacing: 2px;">{{ strtoupper($booking->ticketType->name) }} TICKET</p>
+                @else
+                    <p>EventPass Official Ticket</p>
+                @endif
             </div>
             <div class="ticket-body">
                 <table>
                     <tr>
                         <td style="width: 70%;">
+                            @if($booking->ticketType)
+                                <div class="label">Ticket Package</div>
+                                <div class="value">{{ $booking->ticketType->name }}</div>
+                            @endif
+
                             <div class="label">Ticket Holder</div>
                             <div class="value">{{ $booking->user->name }}</div>
 
