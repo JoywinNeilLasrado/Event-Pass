@@ -68,12 +68,14 @@
         </div>
 
         <!-- Organizer Preference -->
-        <div class="mt-4 flex items-center">
-            <input id="is_organizer" type="checkbox" name="is_organizer" value="1" 
-                   {{ $user->is_organizer ? 'checked' : '' }}
-                   class="form-checkbox h-5 w-5 text-black border-gray-200 dark:border-white/10 dark:bg-black/20 dark:checked:bg-white dark:checked:border-transparent rounded transition focus:ring-black dark:focus:ring-white">
-            <label for="is_organizer" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">
-                Organizer Mode (Enable Dashboard & Event Creation)
+        <div class="mt-6 flex items-center justify-between p-4 rounded-xl border border-gray-200/60 dark:border-white/10 bg-white/50 dark:bg-white/5 transition-colors">
+            <div>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Organizer Mode</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Enable access to the Dashboard and Event Creation tools.</p>
+            </div>
+            <label for="is_organizer" class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input type="checkbox" id="is_organizer" name="is_organizer" value="1" class="sr-only peer" {{ $user->is_organizer ? 'checked' : '' }}>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-white/10 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:after:border-gray-600 peer-checked:bg-black dark:peer-checked:bg-white dark:peer-checked:after:bg-black transition-colors duration-300"></div>
             </label>
         </div>
 
