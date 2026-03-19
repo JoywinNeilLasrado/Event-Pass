@@ -54,7 +54,7 @@
                         </td>
                         <td style="width: 30%; text-align: right;">
                             <div class="qr-wrapper">
-                                <img src="data:image/png;base64,{{ $qrCode }}" alt="QR Code" style="width: 250px; height: 250px;">
+                                <img src="data:image/svg+xml;base64,{{ $qrCode }}" alt="QR Code" style="width: 250px; height: 250px; display: block; margin: 0 auto;">
                                 <div class="qr-placeholder" style="margin-top: 15px;">Scan for entry</div>
                             </div>
                         </td>

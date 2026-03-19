@@ -7,7 +7,6 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
-use SimpleSoftwareIO\QrCode\Generator;
 use Illuminate\Support\Facades\URL;
 
 class BookingController extends Controller
@@ -83,10 +82,10 @@ class BookingController extends Controller
             return back()->with('error', 'You do not have a booking for this event.');
         }
 
-        // reliable zero-dependency PNG generation via QuickChart to bypass DomPDF SVG & Imagick limits
+        // fetch SVG format. QRServer uses SVG fills rather than strokes, which DomPDF handles perfectly.
         $verifyUrl = URL::signedRoute('tickets.verify', ['booking' => $booking->id]);
-        $pngData = file_get_contents('https://quickchart.io/qr?size=300&margin=2&ecLevel=H&text=' . urlencode($verifyUrl));
-        $qrCode = base64_encode($pngData);
+        $svgData = file_get_contents('https://api.qrserver.com/v1/create-qr-code/?size=200x200&format=svg&data=' . urlencode($verifyUrl));
+        $qrCode = base64_encode($svgData);
 
         $pdf = Pdf::loadView('bookings.ticket', compact('booking', 'event', 'qrCode'));
 
