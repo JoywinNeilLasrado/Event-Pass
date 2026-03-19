@@ -31,8 +31,47 @@ class DashboardController extends Controller
             'events_created'  => $myEvents->where('deleted_at', null)->count(),
             'tickets_booked'  => $myBookings->count(),
             'total_attendees' => $myEvents->sum('bookings_count'),
+            'total_revenue'   => 0,
+            'total_views'     => $myEvents->sum('views')
         ];
 
-        return view('dashboard', compact('myEvents', 'myBookings', 'stats'));
+        // Analytics variables
+        $salesByDate = [];
+        $totalRevenue = 0;
+
+        foreach ($myEvents as $event) {
+            foreach ($event->bookings as $booking) {
+                // Sales aggregation
+                $dateStr = $booking->created_at->format('Y-m-d');
+                if (!isset($salesByDate[$dateStr])) {
+                    $salesByDate[$dateStr] = 0;
+                }
+                $salesByDate[$dateStr]++;
+
+                // Revenue calculation
+                if ($booking->ticketType) {
+                    $totalRevenue += (float) $booking->ticketType->price;
+                }
+            }
+        }
+
+        $stats['total_revenue'] = $totalRevenue;
+        
+        // Sorting dates for the chart
+        ksort($salesByDate);
+        $chartLabels = array_keys($salesByDate);
+        $chartData = array_values($salesByDate);
+
+        // Fill empty dates if needed, or just pass as is (Chart.js handles categories fine)
+        if (empty($chartLabels)) {
+            $chartLabels = [date('Y-m-d')];
+            $chartData = [0];
+        }
+
+        $conversionRate = $stats['total_views'] > 0 
+            ? round(($stats['total_attendees'] / $stats['total_views']) * 100, 2) 
+            : 0;
+
+        return view('dashboard', compact('myEvents', 'myBookings', 'stats', 'chartLabels', 'chartData', 'conversionRate'));
     }
 }

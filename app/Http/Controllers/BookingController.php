@@ -12,6 +12,18 @@ use Illuminate\Support\Facades\URL;
 
 class BookingController extends Controller
 {
+    public function index(Request $request)
+    {
+        $myBookings = $request->user()->bookings()
+            ->with(['event' => function ($q) {
+                $q->withTrashed()->with(['category', 'user']);
+            }])
+            ->latest()
+            ->get();
+
+        return view('bookings.index', compact('myBookings'));
+    }
+
     public function store(Request $request, Event $event)
     {
         $request->validate([

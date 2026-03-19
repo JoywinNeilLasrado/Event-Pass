@@ -28,10 +28,17 @@ class EventController extends Controller
             $query->where('category_id', $request->category);
         }
 
+        $myEvents = collect();
+        if (auth()->check()) {
+            $myEvents = Event::where('user_id', auth()->id())->latest()->get();
+            // Don't show my events in the main "Upcoming Events" feed
+            $query->where('user_id', '!=', auth()->id());
+        }
+
         $events = $query->paginate(9)->withQueryString();
         $categories = Category::all();
 
-        return view('events.index', compact('events', 'categories'));
+        return view('events.index', compact('events', 'categories', 'myEvents'));
     }
 
     public function create()
@@ -79,6 +86,9 @@ class EventController extends Controller
 
     public function show(Event $event)
     {
+        // Increment the page views to calculate conversion rate later
+        $event->increment('views');
+
         $event->load(['category', 'user', 'tags', 'bookings', 'ticketTypes']);
         $hasBooked = auth()->check()
             ? $event->bookings()->where('user_id', auth()->id())->exists()
@@ -179,5 +189,35 @@ class EventController extends Controller
 
         return redirect()->route('events.index')
             ->with('success', 'Event deleted (soft).');
+    }
+
+    public function exportAttendees(Event $event)
+    {
+        $bookings = $event->bookings()->with(['user', 'ticketType'])->latest()->get();
+
+        $cols = ['Booking ID', 'Attendee Name', 'Attendee Email', 'Ticket Type', 'Price', 'Booked At', 'Status'];
+        
+        $output = fopen('php://temp', 'w');
+        fputcsv($output, $cols);
+
+        foreach ($bookings as $booking) {
+            fputcsv($output, [
+                $booking->id,
+                $booking->user->name,
+                $booking->user->email,
+                $booking->ticketType ? $booking->ticketType->name : 'Standard',
+                $booking->ticketType ? ($booking->ticketType->price ?? 0) : 0,
+                $booking->created_at->format('Y-m-d H:i:s'),
+                $booking->is_checked_in ? 'Checked In' : 'Confirmed'
+            ]);
+        }
+
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
+
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="attendees_event_' . $event->id . '.csv"');
     }
 }

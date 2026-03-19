@@ -65,16 +65,187 @@
                         </div>
                     </div>
 
-                    <div>
+                    <div x-data="locationAutocomplete()" @click.away="open = false" x-init="initMap()">
                         <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Location <span class="text-red-500 dark:text-red-400">*</span></label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        
+                        <!-- Map Container with Integrated Search Bar -->
+                        <div class="relative w-full h-[350px] rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm z-0">
+                            <!-- Map div -->
+                            <div id="location-map" class="w-full h-full relative z-0"></div>
+                            
+                            <!-- Floating Search Bar Overlay -->
+                            <div class="absolute top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-lg z-[1000]">
+                                <div class="relative shadow-xl rounded-lg backdrop-blur-md bg-white/90 dark:bg-black/80">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 dark:text-gray-400">
+                                        <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                    </div>
+                                    <input type="text" name="location" required
+                                        x-model="query"
+                                        @input.debounce.300ms="fetchLocations"
+                                        @focus="open = results.length > 0"
+                                        class="w-full pl-11 pr-4 py-3.5 bg-transparent border-0 ring-1 ring-black/5 dark:ring-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 transition-all font-medium text-sm" placeholder="Search venue name or pick on map...">
+                                </div>
+                                    
+                                <!-- Autocomplete Dropdown -->
+                                <div x-show="open && results.length > 0" x-cloak
+                                     class="absolute w-full mt-2 bg-white dark:bg-[#111] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl max-h-64 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                                    <template x-for="(result, index) in results" :key="index">
+                                        <button type="button" @click="selectLocation(result)"
+                                                class="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/5 border-b border-gray-100 dark:border-white/5 last:border-0 transition-colors flex items-start gap-3 focus:outline-none focus:bg-gray-50 dark:focus:bg-white/5">
+                                            <svg class="w-4 h-4 mt-0.5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                                            <div>
+                                                <p class="text-sm font-semibold text-gray-900 dark:text-white" x-text="result.name"></p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" x-text="result.details"></p>
+                                            </div>
+                                        </button>
+                                    </template>
+                                </div>
                             </div>
-                            <input type="text" name="location" value="{{ old('location') }}" required
-                                class="form-input-vercel pl-10 pr-4 py-3 placeholder-gray-400 dark:placeholder-gray-600" placeholder="Venue name or address">
+                            
+                            <!-- Leaflet Resources -->
+                            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+                            <!-- Fix for Leaflet z-index overlapping dropdowns -->
+                            <style> .leaflet-pane { z-index: 10 !important; } .leaflet-top, .leaflet-bottom { z-index: 10 !important; } </style>
+                            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
                         </div>
                     </div>
+
+                    <script>
+                        document.addEventListener('alpine:init', () => {
+                            Alpine.data('locationAutocomplete', () => ({
+                                query: '{{ old('location') }}',
+                                results: [],
+                                open: false,
+                                map: null,
+                                marker: null,
+                                
+                                initMap() {
+                                    const checkL = setInterval(() => {
+                                        if (window.L) {
+                                            clearInterval(checkL);
+                                            this.setupMap();
+                                        }
+                                    }, 100);
+                                },
+                                
+                                setupMap() {
+                                    let defaultLat = 12.9141; // Mangalore roughly, since context mentions it
+                                    let defaultLng = 74.8560;
+                                    let defaultZoom = 2;
+                                    
+                                    this.map = L.map('location-map').setView([defaultLat, defaultLng], defaultZoom);
+                                    
+                                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                        attribution: '&copy; OpenStreetMap contributors'
+                                    }).addTo(this.map);
+                                    
+                                    this.map.on('click', (e) => {
+                                        this.setMarker(e.latlng.lat, e.latlng.lng);
+                                        this.reverseGeocode(e.latlng.lat, e.latlng.lng);
+                                    });
+                                    
+                                    if(this.query) {
+                                        this.geocode(this.query);
+                                    } else {
+                                        // Try geolocation if no query
+                                        if(navigator.geolocation) {
+                                            navigator.geolocation.getCurrentPosition(pos => {
+                                                if(!this.query) {
+                                                    this.map.setView([pos.coords.latitude, pos.coords.longitude], 10);
+                                                }
+                                            }, () => {});
+                                        }
+                                    }
+                                },
+                                
+                                setMarker(lat, lng) {
+                                    if (this.marker) {
+                                        this.marker.setLatLng([lat, lng]);
+                                    } else {
+                                        this.marker = L.marker([lat, lng]).addTo(this.map);
+                                    }
+                                    this.map.setView([lat, lng], 15);
+                                },
+                                
+                                async reverseGeocode(lat, lng) {
+                                    try {
+                                        const response = await fetch(`https://photon.komoot.io/reverse?lon=${lng}&lat=${lat}`);
+                                        const data = await response.json();
+                                        if (data.features && data.features.length > 0) {
+                                            const props = data.features[0].properties;
+                                            let name = props.name || props.street || props.city || 'Unknown Location';
+                                            let details = [];
+                                            if (name !== props.city && props.city) details.push(props.city);
+                                            if (name !== props.street && props.street) details.push(props.street);
+                                            if (props.state) details.push(props.state);
+                                            if (props.country) details.push(props.country);
+                                            
+                                            this.query = details.length > 0 ? `${name}, ${details.join(', ')}` : name;
+                                        }
+                                    } catch(e) {}
+                                },
+                                
+                                async geocode(searchQuery) {
+                                    try {
+                                        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(searchQuery)}&limit=1`);
+                                        const data = await response.json();
+                                        if (data.features && data.features.length > 0) {
+                                            const coords = data.features[0].geometry.coordinates;
+                                            this.setMarker(coords[1], coords[0]);
+                                        }
+                                    } catch(e) {}
+                                },
+                                
+                                async fetchLocations() {
+                                    if (this.query.length < 3) {
+                                        this.results = [];
+                                        this.open = false;
+                                        return;
+                                    }
+                                    
+                                    // Also geocode silently to move map while typing
+                                    this.geocode(this.query);
+                                    
+                                    try {
+                                        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(this.query)}&limit=5`);
+                                        const data = await response.json();
+                                        
+                                        this.results = data.features.map(f => {
+                                            const props = f.properties;
+                                            let details = [];
+                                            if (props.street) details.push(props.street);
+                                            if (props.city) details.push(props.city);
+                                            if (props.state) details.push(props.state);
+                                            if (props.country) details.push(props.country);
+                                            
+                                            let name = props.name || props.street || props.city || 'Unknown Location';
+                                            
+                                            if (name === props.city) details = details.filter(d => d !== props.city);
+                                            else if (name === props.street) details = details.filter(d => d !== props.street);
+                                            
+                                            return {
+                                                name: name,
+                                                details: details.join(', '),
+                                                fullName: details.length > 0 ? `${name}, ${details.join(', ')}` : name,
+                                                coords: f.geometry.coordinates
+                                            };
+                                        });
+                                        this.open = this.results.length > 0;
+                                    } catch (error) {
+                                        this.results = [];
+                                    }
+                                },
+                                
+                                selectLocation(result) {
+                                    this.query = result.fullName;
+                                    this.open = false;
+                                    if (result.coords) {
+                                        this.setMarker(result.coords[1], result.coords[0]);
+                                    }
+                                }
+                            }));
+                        });
+                    </script>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>

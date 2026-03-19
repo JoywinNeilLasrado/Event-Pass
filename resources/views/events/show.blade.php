@@ -88,8 +88,37 @@
                         <div class="lg:col-span-2">
                             <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight mb-8 transition-colors">{{ $event->title }}</h1>
                             
-                            <div class="prose prose-lg text-gray-600 dark:text-gray-400 prose-headings:text-black dark:prose-headings:text-white prose-a:text-indigo-600 dark:prose-a:text-indigo-400 font-light leading-relaxed transition-colors">
+                            <div class="prose prose-lg text-gray-600 dark:text-gray-400 prose-headings:text-black dark:prose-headings:text-white prose-a:text-indigo-600 dark:prose-a:text-indigo-400 font-light leading-relaxed transition-colors mb-12">
                                 {!! nl2br(e($event->description)) !!}
+                            </div>
+                            
+                            <!-- Location Map inside Main Content (Beautiful Rectangle) -->
+                            <div class="pt-8 border-t border-gray-100 dark:border-white/5">
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 tracking-tight">Location</h2>
+                                
+                                <p class="mb-4 text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    {{ $event->location }}
+                                </p>
+                                
+                                <div class="w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm relative group bg-gray-50 dark:bg-white/5">
+                                    <!-- Embedded Google Map -->
+                                    <iframe 
+                                        width="100%" 
+                                        height="100%" 
+                                        frameborder="0" 
+                                        style="border:0;" 
+                                        src="https://maps.google.com/maps?q={{ urlencode($event->location) }}&t=&z=14&ie=UTF8&iwloc=&output=embed" 
+                                        allowfullscreen>
+                                    </iframe>
+                                    
+                                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($event->location) }}" target="_blank" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+                                        <span class="bg-white text-black text-sm font-bold uppercase tracking-widest px-6 py-3 rounded-full shadow-xl flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                                            Get Directions
+                                        </span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
@@ -113,7 +142,7 @@
                                         <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white/50 dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-4 shadow-sm transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                         </div>
-                                        <div class="pt-0.5">
+                                        <div class="pt-0.5 w-full">
                                             <p class="text-sm font-semibold text-gray-900 dark:text-white leading-snug transition-colors">{{ $event->location }}</p>
                                         </div>
                                     </div>

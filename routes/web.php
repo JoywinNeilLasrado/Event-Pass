@@ -40,6 +40,7 @@ Route::middleware(['auth', 'event.owner'])->group(function () {
     Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     Route::get('/events/{event}/attendees', [EventController::class, 'attendees'])->name('events.attendees');
+    Route::get('/events/{event}/export', [EventController::class, 'exportAttendees'])->name('events.export');
 });
 
 // --- Profile Routes ---
@@ -49,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Bookings
+    Route::get('/my-tickets', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('/events/{event}/book', [BookingController::class, 'store'])->name('bookings.store');
     Route::delete('/events/{event}/book', [BookingController::class, 'destroy'])->name('bookings.destroy');
     Route::get('/events/{event}/ticket', [BookingController::class, 'downloadTicket'])->name('bookings.ticket');
