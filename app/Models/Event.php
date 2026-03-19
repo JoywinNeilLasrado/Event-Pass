@@ -23,6 +23,7 @@ class Event extends Model
         'available_tickets',
         'poster_image',
         'images',
+        'is_featured',
     ];
 
     protected $casts = [
@@ -55,8 +56,18 @@ class Event extends Model
         return $this->hasMany(TicketType::class);
     }
 
+    public function promoCodes(): HasMany
+    {
+        return $this->hasMany(PromoCode::class);
+    }
+
     public function getRemainingAttribute()
     {
         return $this->available_tickets - $this->bookings()->count();
+    }
+
+    public function waitlists(): HasMany
+    {
+        return $this->hasMany(Waitlist::class);
     }
 }

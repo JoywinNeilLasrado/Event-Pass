@@ -13,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\Event;
 use App\Models\Booking;
 
-class EventReminder extends Mailable
+class EventReminder extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

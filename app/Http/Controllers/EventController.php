@@ -72,6 +72,7 @@ class EventController extends Controller
 
         $data['user_id'] = auth()->id();
         $data['available_tickets'] = collect($data['tickets'])->sum('capacity');
+        $data['is_featured'] = $request->boolean('is_featured');
 
         $event = Event::create($data);
         $event->tags()->sync($request->input('tags', []));
@@ -93,7 +94,12 @@ class EventController extends Controller
         $hasBooked = auth()->check()
             ? $event->bookings()->where('user_id', auth()->id())->exists()
             : false;
-        return view('events.show', compact('event', 'hasBooked'));
+            
+        $userWaitlistTiers = auth()->check()
+            ? auth()->user()->waitlists()->where('event_id', $event->id)->pluck('ticket_type_id')->toArray()
+            : [];
+
+        return view('events.show', compact('event', 'hasBooked', 'userWaitlistTiers'));
     }
 
     public function edit(Event $event)

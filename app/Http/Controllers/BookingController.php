@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TicketBooked;
 
 class BookingController extends Controller
 {
@@ -26,7 +28,8 @@ class BookingController extends Controller
     public function store(Request $request, Event $event)
     {
         $request->validate([
-            'ticket_type_id' => 'required|exists:ticket_types,id'
+            'ticket_type_id' => 'required|exists:ticket_types,id',
+            'promo_code' => 'nullable|string'
         ]);
 
         $alreadyBooked = $event->bookings()->where('user_id', auth()->id())->exists();
@@ -35,8 +38,36 @@ class BookingController extends Controller
         }
 
         $ticketType = $event->ticketTypes()->findOrFail($request->ticket_type_id);
+        
+        $promoCode = null;
+        $finalPrice = $ticketType->price;
 
-        $updated = DB::transaction(function () use ($event, $ticketType) {
+        if ($request->filled('promo_code')) {
+            $codeStr = strtoupper(trim($request->promo_code));
+            $promoCode = $event->promoCodes()->where('code', $codeStr)->first();
+
+            if (!$promoCode) {
+                return back()->with('error', 'Invalid promo code.');
+            }
+
+            if ($promoCode->expires_at && $promoCode->expires_at->isPast()) {
+                return back()->with('error', 'This promo code has expired.');
+            }
+
+            if ($promoCode->max_uses && $promoCode->uses >= $promoCode->max_uses) {
+                return back()->with('error', 'This promo code usage limit has been reached.');
+            }
+
+            if ($promoCode->discount_type === 'percentage') {
+                $finalPrice = $finalPrice - ($finalPrice * ($promoCode->discount_amount / 100));
+            } else {
+                $finalPrice = $finalPrice - $promoCode->discount_amount;
+            }
+
+            $finalPrice = max(0, $finalPrice);
+        }
+
+        $updated = DB::transaction(function () use ($event, $ticketType, $promoCode, $finalPrice) {
             $event = Event::lockForUpdate()->find($event->id);
             $ticketType = \App\Models\TicketType::lockForUpdate()->find($ticketType->id);
 
@@ -44,16 +75,35 @@ class BookingController extends Controller
                 return false;
             }
 
+            if ($promoCode) {
+                $promoCode = \App\Models\PromoCode::lockForUpdate()->find($promoCode->id);
+                if ($promoCode->max_uses && $promoCode->uses >= $promoCode->max_uses) {
+                    return false;
+                }
+                $promoCode->increment('uses');
+            }
+
             $event->bookings()->create([
                 'user_id' => auth()->id(),
-                'ticket_type_id' => $ticketType->id
+                'ticket_type_id' => $ticketType->id,
+                'promo_code_id' => $promoCode ? $promoCode->id : null,
+                'amount_paid' => $finalPrice
             ]);
 
             return true;
         });
 
         if (!$updated) {
-            return back()->with('error', 'Sorry, no tickets are available for this event.');
+            return back()->with('error', 'Sorry, tickets or promo code are no longer available for this event.');
+        }
+
+        $booking = $event->bookings()->where('user_id', auth()->id())->latest()->first();
+        if ($booking) {
+            Mail::to(auth()->user()->email)->send(new TicketBooked($booking));
+        }
+
+        if ($promoCode) {
+            return back()->with('success', 'Promo code applied! Ticket booked for $'.number_format($finalPrice, 2).'. 🎉');
         }
 
         return back()->with('success', 'Ticket booked successfully! Enjoy the event! 🎉');
@@ -67,9 +117,22 @@ class BookingController extends Controller
             return back()->with('error', 'You do not have a booking for this event.');
         }
 
+        $ticketTypeId = $booking->ticket_type_id;
+
         DB::transaction(function () use ($booking) {
             $booking->delete();
         });
+
+        $waitlistedUser = $event->waitlists()
+            ->where('ticket_type_id', $ticketTypeId)
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'asc')
+            ->first();
+
+        if ($waitlistedUser) {
+            \Illuminate\Support\Facades\Mail::to($waitlistedUser->user->email)->send(new \App\Mail\WaitlistAvailable($waitlistedUser));
+            $waitlistedUser->update(['status' => 'notified']);
+        }
 
         return back()->with('success', 'Your ticket has been cancelled and the seat has been returned. 🔓');
     }

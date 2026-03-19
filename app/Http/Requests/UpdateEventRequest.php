@@ -31,6 +31,7 @@ class UpdateEventRequest extends FormRequest
             'poster_image'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'images'            => 'nullable|array|max:10',
             'images.*'          => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'is_featured'       => 'nullable|boolean',
         ];
     }
 }

@@ -51,6 +51,17 @@
 
                             <div class="label">Booking ID</div>
                             <div class="value" style="font-family: monospace; font-size: 16px;">#EVT-{{ str_pad($event->id, 4, '0', STR_PAD_LEFT) }}-B{{ str_pad($booking->id, 4, '0', STR_PAD_LEFT) }}</div>
+
+                            <div class="label">Amount Paid</div>
+                            <div class="value" style="font-size: 16px;">
+                                @if($booking->amount_paid > 0)
+                                    ${{ number_format($booking->amount_paid, 2) }}
+                                @elseif($booking->ticketType && $booking->ticketType->price > 0 && $booking->amount_paid == 0)
+                                    100% Promo Code OFF
+                                @else
+                                    FREE
+                                @endif
+                            </div>
                         </td>
                         <td style="width: 30%; text-align: right;">
                             <div class="qr-wrapper">

@@ -122,9 +122,7 @@
                                         {{-- Event Analytics Row --}}
                                         <div class="mt-4 pt-4 border-t border-gray-100 dark:border-white/10 transition-colors">
                                             @php 
-                                                $eventRevenue = $event->bookings->sum(function($b) { 
-                                                    return $b->ticketType ? $b->ticketType->price : 0; 
-                                                });
+                                                $eventRevenue = $event->bookings->sum('amount_paid');
                                                 $eventConversion = $event->views > 0 ? round(($event->bookings_count / $event->views) * 100, 1) : 0;
                                                 $checkedInCount = $event->bookings->where('is_checked_in', true)->count();
                                             @endphp
@@ -160,6 +158,10 @@
                                             <a href="{{ route('events.export', $event->id) }}"
                                                class="inline-flex items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 text-gray-900 dark:text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm flex-1 sm:flex-none">
                                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>Export CSV
+                                            </a>
+                                            <a href="{{ route('promo_codes.index', $event->id) }}"
+                                               class="inline-flex items-center justify-center bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm flex-1 sm:flex-none">
+                                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>Promo Codes
                                             </a>
                                             <div class="flex gap-2 w-full mt-2">
                                                 <a href="{{ route('events.edit', $event->id) }}"

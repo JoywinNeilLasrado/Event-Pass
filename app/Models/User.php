@@ -36,4 +36,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Booking::class);
     }
+
+    public function waitlists(): HasMany
+    {
+        return $this->hasMany(Waitlist::class);
+    }
 }

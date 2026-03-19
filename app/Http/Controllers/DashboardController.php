@@ -48,10 +48,8 @@ class DashboardController extends Controller
                 }
                 $salesByDate[$dateStr]++;
 
-                // Revenue calculation
-                if ($booking->ticketType) {
-                    $totalRevenue += (float) $booking->ticketType->price;
-                }
+                // Revenue calculation based on actual paid amount (accounting for promo codes)
+                $totalRevenue += (float) $booking->amount_paid;
             }
         }
 

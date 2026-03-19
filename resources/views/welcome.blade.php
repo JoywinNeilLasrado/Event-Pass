@@ -86,71 +86,78 @@
                 @endauth
             </div>
             
-            <!-- Beautiful Dashboard Mockup -->
-            <div class="mt-28 relative mx-auto max-w-5xl group perspective-1000">
-                <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#FAFAFA] dark:from-black to-transparent z-20 pointer-events-none"></div>
-                
-                <div class="card p-2 sm:p-4 rounded-3xl bg-white/40 dark:bg-white/5 backdrop-blur-3xl border border-white/60 dark:border-white/10 shadow-2xl relative transform transition-transform duration-700 hover:-translate-y-2 hover:shadow-[0_20px_60px_-15px_rgba(168,85,247,0.3)]">
-                    <div class="bg-gray-50/90 dark:bg-[#0A0A0A]/90 rounded-2xl overflow-hidden border border-gray-200/50 dark:border-white/5 aspect-[16/10] sm:aspect-[16/9] flex items-center justify-center relative shadow-inner">
-                        
-                        <!-- Header Bar Mockup -->
-                        <div class="absolute top-0 left-0 right-0 h-10 sm:h-12 border-b border-gray-200/50 dark:border-white/5 flex items-center justify-between px-4 sm:px-6 bg-white/50 dark:bg-black/50 backdrop-blur-md z-10">
-                            <div class="flex gap-2">
-                                <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                                <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                                <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
-                            </div>
-                            <div class="w-20 sm:w-24 h-3 sm:h-4 bg-gray-200/50 dark:bg-white/10 rounded-full"></div>
+            @if(isset($featuredEvents) && $featuredEvents->count() > 0)
+                <!-- Featured Events Carousel -->
+                <div class="mt-24 sm:mt-32 w-full max-w-[100vw] overflow-hidden" x-data="{
+                    activeSlide: 0,
+                    slides: {{ $featuredEvents->count() }},
+                    next() { this.activeSlide = this.activeSlide === this.slides - 1 ? 0 : this.activeSlide + 1 },
+                    prev() { this.activeSlide = this.activeSlide === 0 ? this.slides - 1 : this.activeSlide - 1 },
+                    init() {
+                        setInterval(() => { this.next() }, 5000); // Auto-scroll every 5 seconds
+                    }
+                }">
+                    <div class="flex items-center justify-between mb-8 px-4 sm:px-0 max-w-7xl mx-auto">
+                        <div class="text-left">
+                            <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">Featured Events</h2>
+                            <p class="text-gray-500 dark:text-gray-400 mt-2">Discover premium experiences curated just for you.</p>
                         </div>
+                        <div class="flex gap-2">
+                            <button @click="prev()" class="p-2 sm:p-3 rounded-full bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20 border border-gray-200 dark:border-white/10 shadow-sm transition-all focus:outline-none">
+                                <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                            <button @click="next()" class="p-2 sm:p-3 rounded-full bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/20 border border-gray-200 dark:border-white/10 shadow-sm transition-all focus:outline-none">
+                                <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                    </div>
 
-                        <!-- Sidebar + Content Mockup -->
-                        <div class="absolute inset-0 top-10 sm:top-12 flex">
-                            <!-- Sidebar -->
-                            <div class="w-1/4 border-r border-gray-200/50 dark:border-white/5 p-4 sm:p-6 space-y-4 hidden md:block bg-white/30 dark:bg-white/5">
-                                <div class="w-full h-8 bg-gray-200/50 dark:bg-white/10 rounded-lg mb-8"></div>
-                                <div class="w-3/4 h-3 sm:h-4 bg-gray-200/50 dark:bg-white/10 rounded-full"></div>
-                                <div class="w-5/6 h-3 sm:h-4 bg-gray-200/50 dark:bg-white/10 rounded-full"></div>
-                                <div class="w-1/2 h-3 sm:h-4 bg-gray-200/50 dark:bg-white/10 rounded-full"></div>
-                            </div>
-                            <!-- Main View -->
-                            <div class="flex-1 p-4 sm:p-6 relative overflow-hidden">
-                                <!-- Title -->
-                                <div class="w-1/2 md:w-1/3 h-6 sm:h-8 bg-gradient-to-r from-gray-200/80 to-gray-100/50 dark:from-white/10 dark:to-white/5 rounded-lg mb-6 sm:mb-8"></div>
-                                
-                                <!-- Cards Row -->
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                                    <div class="h-20 sm:h-24 bg-white/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/5 rounded-2xl shadow-sm flex flex-col justify-center p-3 sm:p-4">
-                                        <div class="w-1/2 h-2 sm:h-3 bg-gray-200/50 dark:bg-white/10 rounded-full mb-3"></div>
-                                        <div class="w-3/4 h-4 sm:h-6 bg-gray-300/50 dark:bg-white/20 rounded-md"></div>
+                    <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-0">
+                        <div class="overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl relative bg-gray-100 dark:bg-gray-900 aspect-[16/9] sm:aspect-[21/9]">
+                            <div class="flex w-full h-full transition-transform duration-700 ease-in-out" :style="`transform: translateX(-${activeSlide * 100}%);`">
+                                @foreach($featuredEvents as $index => $event)
+                                    <div class="w-full h-full flex-shrink-0 relative group cursor-pointer" onclick="window.location='{{ route('events.show', $event) }}'">
+                                        <!-- Background Image -->
+                                        @if($event->poster_image)
+                                            <img src="{{ Storage::url($event->poster_image) }}" alt="{{ $event->title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                        @else
+                                            <div class="absolute inset-0 w-full h-full bg-gradient-to-tr from-indigo-500 to-purple-600"></div>
+                                        @endif
+                                        
+                                        <!-- Gradient Overlay -->
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                                        
+                                        <!-- Content -->
+                                        <div class="absolute inset-0 p-6 sm:p-12 flex flex-col justify-end text-left pb-12 sm:pb-16 text-white">
+                                            <div class="flex flex-wrap gap-2 mb-4">
+                                                <span class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider">{{ $event->category ? $event->category->name : 'Event' }}</span>
+                                                <span class="px-3 py-1 bg-emerald-500/80 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider">Featured</span>
+                                                <span class="px-3 py-1 bg-black/40 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider"><svg class="w-3 h-3 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>{{ $event->date->format('M j, Y') }}</span>
+                                            </div>
+                                            <h3 class="text-3xl sm:text-5xl md:text-6xl font-black mb-2 sm:mb-4 tracking-tight drop-shadow-md">{{ $event->title }}</h3>
+                                            <p class="text-sm sm:text-lg text-white/80 line-clamp-2 max-w-3xl drop-shadow mb-6">{{ $event->description }}</p>
+                                            
+                                            <span class="inline-flex items-center gap-2 text-sm sm:text-base font-bold group-hover:text-purple-300 transition-colors">
+                                                Get Tickets
+                                                <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div class="h-20 sm:h-24 bg-white/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/5 rounded-2xl shadow-sm flex flex-col justify-center p-3 sm:p-4">
-                                        <div class="w-1/2 h-2 sm:h-3 bg-gray-200/50 dark:bg-white/10 rounded-full mb-3"></div>
-                                        <div class="w-2/3 h-4 sm:h-6 bg-gray-300/50 dark:bg-white/20 rounded-md"></div>
-                                    </div>
-                                    <div class="hidden md:flex h-24 bg-white/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/5 rounded-2xl shadow-sm flex-col justify-center p-4">
-                                        <div class="w-1/2 h-3 bg-gray-200/50 dark:bg-white/10 rounded-full mb-3"></div>
-                                        <div class="w-5/6 h-6 bg-gray-300/50 dark:bg-white/20 rounded-md"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Large Graph/Chart area -->
-                                <div class="w-full h-32 sm:h-48 bg-gradient-to-b from-purple-500/10 to-transparent dark:from-purple-500/5 border border-gray-200/50 dark:border-white/5 rounded-2xl relative overflow-hidden">
-                                    <!-- Fake graph line -->
-                                    <svg class="absolute bottom-0 w-full h-full preserve-aspect-none opacity-50 dark:opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                        <path d="M0,100 L0,50 Q25,20 50,60 T100,30 L100,100 Z" fill="currentColor" class="text-purple-500/20"></path>
-                                        <path d="M0,50 Q25,20 50,60 T100,30" fill="none" stroke="currentColor" stroke-width="2" class="text-purple-500"></path>
-                                    </svg>
-                                </div>
+                                @endforeach
                             </div>
                         </div>
                         
-                         <div class="z-30 absolute backdrop-blur-xl bg-white/60 dark:bg-black/60 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/80 dark:border-white/10 flex items-center gap-2 sm:gap-3 transform -translate-y-6 sm:-translate-y-8 animate-bounce" style="animation-duration: 3s;">
-                             <span class="text-base sm:text-lg">✨</span>
-                             <span class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white tracking-wide">Beautiful interface</span>
-                         </div>
+                        <!-- Slide Indicators -->
+                        <div class="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 sm:gap-3 z-20">
+                            <template x-for="(slide, index) in slides" :key="index">
+                                <button @click="activeSlide = index" class="w-12 sm:w-16 h-1 sm:h-1.5 rounded-full transition-all duration-300" :class="activeSlide === index ? 'bg-white' : 'bg-white/30 hover:bg-white/50'"></button>
+                            </template>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
+            
+
             
         </div>
     </main>

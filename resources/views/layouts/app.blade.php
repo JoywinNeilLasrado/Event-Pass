@@ -6,6 +6,8 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'EventPass') }}</title>
+        
+        @stack('meta')
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

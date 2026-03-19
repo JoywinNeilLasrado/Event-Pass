@@ -380,6 +380,15 @@
                         });
                     </script>
 
+                    <!-- Feature Toggle -->
+                    <div>
+                        <hr class="border-gray-100 dark:border-white/10 transition-colors my-8">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" name="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }} class="form-checkbox h-5 w-5 text-indigo-600 dark:text-indigo-500 bg-white/50 dark:bg-black/50 border-gray-300 dark:border-white/20 rounded-md focus:ring-black dark:focus:ring-white transition-colors cursor-pointer">
+                            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 transition-colors">Feature this event on the homepage carousel</span>
+                        </label>
+                    </div>
+
                     <!-- Actions -->
                     <div class="flex flex-col sm:flex-row items-center gap-4 pt-6 mt-8 border-t border-gray-100 dark:border-white/10 transition-colors">
                         <button type="submit" class="btn-vercel w-full sm:w-auto px-8 py-3 text-base">

@@ -28,4 +28,9 @@ class TicketType extends Model
     {
         return $this->capacity - $this->bookings()->count();
     }
+
+    public function waitlists()
+    {
+        return $this->hasMany(Waitlist::class);
+    }
 }
