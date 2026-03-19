@@ -12,12 +12,26 @@ use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $events = Event::with(['category', 'user', 'tags'])
-            ->latest()
-            ->paginate(9);
-        return view('events.index', compact('events'));
+        $query = Event::with(['category', 'user', 'tags'])->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
+        $events = $query->paginate(9)->withQueryString();
+        $categories = Category::all();
+
+        return view('events.index', compact('events', 'categories'));
     }
 
     public function create()
@@ -64,6 +78,26 @@ class EventController extends Controller
         $tags = Tag::all();
         $selectedTags = $event->tags->pluck('id')->toArray();
         return view('events.edit', compact('event', 'categories', 'tags', 'selectedTags'));
+    }
+
+    public function attendees(Request $request, Event $event)
+    {
+        $query = $event->bookings()->with(['user', 'ticketType']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('user', function($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('id', 'like', "%{$search}%"); // search by booking id
+            });
+        }
+
+        $bookings = $query->latest()->get();
+        $event->setRelation('bookings', $bookings); // Override relation with filtered data
+
+        return view('events.attendees', compact('event'));
     }
 
     public function update(UpdateEventRequest $request, Event $event)

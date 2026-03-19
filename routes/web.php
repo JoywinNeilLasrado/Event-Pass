@@ -34,11 +34,12 @@ Route::middleware('auth')->group(function () {
 // Public: show a single event (wildcard comes AFTER /create)
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
 
-// Auth + ownership: edit, update, delete
+// Auth + ownership: edit, update, delete, manage attendees
 Route::middleware(['auth', 'event.owner'])->group(function () {
     Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
     Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
+    Route::get('/events/{event}/attendees', [EventController::class, 'attendees'])->name('events.attendees');
 });
 
 // --- Profile Routes ---

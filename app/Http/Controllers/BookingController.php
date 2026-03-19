@@ -84,7 +84,18 @@ class BookingController extends Controller
     public function verifyTicket(Request $request, Booking $booking)
     {
         $event = $booking->event;
-        $isOwner = auth()->check() && auth()->id() === $event->user_id;
+
+        // Force Login if scanning
+        if (!auth()->check()) {
+            return redirect()->guest(route('login'));
+        }
+
+        // Hard block for any user who did not create this specific event
+        if (auth()->id() !== $event->user_id) {
+            abort(403, 'Security Violation: Only the registered event organizer can scan and verify tickets for this event.');
+        }
+
+        $isOwner = true;
 
         return view('bookings.verify', compact('booking', 'event', 'isOwner'));
     }
