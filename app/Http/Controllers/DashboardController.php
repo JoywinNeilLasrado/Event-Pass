@@ -13,7 +13,7 @@ class DashboardController extends Controller
         // Events this user created, with booking count and attendee list
         $myEvents = $user->events()
             ->withTrashed()
-            ->with(['category', 'bookings.user'])
+            ->with(['category', 'bookings.user', 'ticketTypes'])
             ->withCount('bookings')
             ->orderByDesc('date')
             ->get();

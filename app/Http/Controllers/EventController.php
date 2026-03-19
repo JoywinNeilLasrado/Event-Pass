@@ -14,7 +14,7 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Event::with(['category', 'user', 'tags'])->latest();
+        $query = Event::with(['category', 'user', 'tags', 'ticketTypes', 'bookings'])->latest();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -47,6 +47,20 @@ class EventController extends Controller
 
         if ($request->hasFile('poster_image')) {
             $data['poster_image'] = $request->file('poster_image')->store('posters', 'public');
+        }
+
+        if ($request->hasFile('images')) {
+            $imagesArray = [];
+            foreach ($request->file('images') as $index => $file) {
+                $path = $file->store('posters', 'public');
+                $imagesArray[] = $path;
+                
+                // Fallback: If no primary poster was explicitly uploaded, set the first gallery image as the main event poster
+                if ($index === 0 && !isset($data['poster_image'])) {
+                    $data['poster_image'] = $path;
+                }
+            }
+            $data['images'] = $imagesArray;
         }
 
         $data['user_id'] = auth()->id();
@@ -109,6 +123,22 @@ class EventController extends Controller
                 Storage::disk('public')->delete($event->poster_image);
             }
             $data['poster_image'] = $request->file('poster_image')->store('posters', 'public');
+        }
+
+        if ($request->hasFile('images')) {
+            // Get existing images if replacing
+            $imagesArray = $event->images ?? [];
+            foreach ($request->file('images') as $file) {
+                // we technically append new images to the gallery here
+                $path = $file->store('posters', 'public');
+                $imagesArray[] = $path;
+            }
+            $data['images'] = $imagesArray;
+            
+            // Re-fallback
+            if (!$event->poster_image && !isset($data['poster_image']) && count($imagesArray) > 0) {
+                $data['poster_image'] = $imagesArray[0];
+            }
         }
 
         $data['available_tickets'] = collect($data['tickets'])->sum('capacity');

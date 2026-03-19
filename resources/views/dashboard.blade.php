@@ -54,10 +54,18 @@
             </div>
 
             {{-- ── MY EVENTS ── --}}
-            <div class="card overflow-hidden">
-                <div class="px-6 py-5 border-b border-gray-100 dark:border-white/10 flex justify-between items-center transition-colors">
-                    <h3 class="font-bold text-gray-900 dark:text-white tracking-tight transition-colors">My Events</h3>
-                    <a href="{{ route('events.create') }}" class="btn-vercel text-sm px-4 py-2">+ New Event</a>
+            <div class="card overflow-hidden" x-data="{ searchEvents: '' }">
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 transition-colors">
+                    <h3 class="font-bold text-gray-900 dark:text-white tracking-tight transition-colors whitespace-nowrap">My Events</h3>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto sm:justify-end">
+                        <div class="relative w-full sm:w-64">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                            <input type="text" x-model="searchEvents" class="form-input text-sm w-full pl-9 py-2 rounded-full border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20 focus:bg-white dark:focus:bg-black/50 focus:ring-black/20 dark:focus:ring-white/20 transition-all shadow-sm" placeholder="Filter events...">
+                        </div>
+                        <a href="{{ route('events.create') }}" class="btn-vercel text-sm px-4 py-2 text-center whitespace-nowrap">+ New Event</a>
+                    </div>
                 </div>
 
                 @if($myEvents->isEmpty())
@@ -68,7 +76,9 @@
                 @else
                     <div class="divide-y divide-gray-50 dark:divide-white/5 transition-colors">
                         @foreach($myEvents as $event)
-                            <div class="p-6 transition-colors hover:bg-white/30 dark:hover:bg-black/30 @if($event->deleted_at) opacity-60 grayscale @endif">
+                            <div class="p-6 transition-colors hover:bg-white/30 dark:hover:bg-black/30 @if($event->deleted_at) opacity-60 grayscale @endif"
+                                 x-show="searchEvents === '' || {{ json_encode(strtolower($event->title)) }}.includes(searchEvents.toLowerCase())"
+                                 x-transition.opacity.duration.300ms>
                                 <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-3 flex-wrap mb-1">
@@ -85,7 +95,7 @@
                                         <div class="flex items-center gap-4 text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 transition-colors">
                                             <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {{ $event->date->format('M j, Y') }}</span>
                                             <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> {{ $event->location }}</span>
-                                            <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg> {{ $event->available_tickets }} seats left</span>
+                                            <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg> {{ $event->remaining }} seats left</span>
                                         </div>
 
                                         {{-- Nav to Dedicated Attendees Page --}}

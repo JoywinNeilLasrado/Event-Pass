@@ -22,10 +22,12 @@ class Event extends Model
         'location',
         'available_tickets',
         'poster_image',
+        'images',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'images' => 'array',
     ];
 
     public function user(): BelongsTo

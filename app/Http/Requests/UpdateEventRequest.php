@@ -29,6 +29,8 @@ class UpdateEventRequest extends FormRequest
             'tags'              => 'nullable|array',
             'tags.*'            => 'exists:tags,id',
             'poster_image'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images'            => 'nullable|array|max:10',
+            'images.*'          => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ];
     }
 }

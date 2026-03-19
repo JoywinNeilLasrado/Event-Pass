@@ -99,10 +99,10 @@
                                 
                                 <!-- Footer -->
                                 <div class="mt-6 pt-5 flex items-center justify-between border-t border-gray-100 dark:border-white/10 transition-colors">
-                                    <div class="flex items-center gap-2 {{ $event->available_tickets > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400' }} transition-colors">
-                                        <div class="w-1.5 h-1.5 rounded-full bg-current {{ $event->available_tickets > 0 ? 'animate-pulse' : '' }}"></div>
+                                    <div class="flex items-center gap-2 {{ $event->remaining > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400' }} transition-colors">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-current {{ $event->remaining > 0 ? 'animate-pulse' : '' }}"></div>
                                         <span class="text-[11px] font-bold uppercase tracking-widest">
-                                            {{ $event->available_tickets > 0 ? $event->available_tickets . ' Tickets Left' : 'Sold Out' }}
+                                            {{ $event->remaining > 0 ? $event->remaining . ' Tickets Left' : 'Sold Out' }}
                                         </span>
                                     </div>
                                     

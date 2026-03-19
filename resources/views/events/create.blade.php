@@ -169,19 +169,45 @@
                     <hr class="border-gray-100 dark:border-white/10 transition-colors">
 
                     <!-- Media Group -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 transition-colors">Event Poster</label>
-                        <div class="flex-grow w-full">
+                    <div x-data="imagePreviewer()">
+                        <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 transition-colors">Event Posters & Gallery</label>
+                        <div class="flex flex-col gap-4 w-full">
                             <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 dark:border-white/20 border-dashed rounded-lg cursor-pointer bg-white/30 dark:bg-white/5 backdrop-blur-sm hover:bg-white/40 dark:hover:bg-white/10 transition-colors">
                                 <div class="flex flex-col items-center justify-center pt-5 pb-6">
                                     <svg class="w-8 h-8 mb-3 text-gray-400 dark:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                    <p class="mb-1 text-sm text-gray-500 dark:text-gray-400 font-semibold transition-colors">Click to upload or drag and drop</p>
-                                    <p class="text-xs text-gray-400 dark:text-gray-500 transition-colors">SVG, PNG, JPG (MAX. 2MB)</p>
+                                    <p class="mb-1 text-sm text-gray-500 dark:text-gray-400 font-semibold transition-colors">Click to upload or drag multiple files here</p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 transition-colors">SVG, PNG, JPG (MAX. 2MB each)</p>
                                 </div>
-                                <input type="file" name="poster_image" accept="image/*" class="hidden">
+                                <input type="file" name="images[]" multiple accept="image/*" class="hidden" @change="fileChosen">
                             </label>
+
+                            <!-- Live Preview Area -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" x-show="imageUrls.length > 0" x-cloak>
+                                <template x-for="(url, index) in imageUrls" :key="index">
+                                    <div class="relative group aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm bg-gray-50 dark:bg-white/5 transition-colors">
+                                        <img :src="url" class="object-cover w-full h-full">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span class="text-xs font-bold text-white uppercase tracking-widest bg-black/50 px-2 py-1 rounded">Preview</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
+                    <script>
+                        document.addEventListener('alpine:init', () => {
+                            Alpine.data('imagePreviewer', () => ({
+                                imageUrls: [],
+                                fileChosen(event) {
+                                    this.imageUrls = [];
+                                    const files = event.target.files;
+                                    for (let i = 0; i < files.length; i++) {
+                                        this.imageUrls.push(URL.createObjectURL(files[i]));
+                                    }
+                                }
+                            }));
+                        });
+                    </script>
 
                     <!-- Actions -->
                     <div class="flex flex-col sm:flex-row items-center gap-4 pt-6 mt-8 border-t border-gray-100 dark:border-white/10 transition-colors">

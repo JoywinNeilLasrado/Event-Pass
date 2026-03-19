@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 class="font-extrabold text-2xl text-gray-900 dark:text-white tracking-tight line-clamp-1 truncate transition-colors">{{ $event->title }}</h2>
-            <a href="{{ route('events.index') }}" class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors flex items-center">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+            <a href="{{ route('events.index') }}" class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors flex items-center mb-1 sm:mb-0 mr-2">
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Back to Events
             </a>
+            <h2 class="font-extrabold text-2xl text-gray-900 dark:text-white tracking-tight line-clamp-1 truncate transition-colors">{{ $event->title }}</h2>
         </div>
     </x-slot>
 
@@ -20,16 +20,57 @@
             @endif
 
             <div class="card overflow-hidden shadow-md">
-                <!-- Hero Image Section -->
-                <div class="w-full h-72 sm:h-[400px] relative bg-white/30 dark:bg-white/5 backdrop-blur-sm flex items-center justify-center border-b border-gray-100 dark:border-white/10 transition-colors">
-                    @if($event->poster_image)
-                        <img src="{{ Storage::url($event->poster_image) }}" alt="{{ $event->title }}" class="w-full h-full object-cover">
+                <!-- Hero Image Gallery -->
+                @php
+                    $allImages = is_array($event->images) ? $event->images : [];
+                    if ($event->poster_image && !in_array($event->poster_image, $allImages)) {
+                        array_unshift($allImages, $event->poster_image);
+                    }
+                @endphp
+                <div class="w-full h-72 sm:h-[400px] relative bg-white/30 dark:bg-white/5 backdrop-blur-sm flex items-center justify-center border-b border-gray-100 dark:border-white/10 transition-colors overflow-hidden" 
+                     x-data="{ activeIndex: 0, total: {{ count($allImages) }} }">
+                    
+                    @if(count($allImages) > 0)
+                        @foreach($allImages as $index => $imgPath)
+                            <div class="absolute inset-0 transition-opacity duration-500 ease-in-out" 
+                                 x-show="activeIndex === {{ $index }}"
+                                 x-transition:enter="transition-opacity duration-500"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="transition-opacity duration-500"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 @if($index !== 0) style="display: none;" @endif>
+                                <img src="{{ Storage::url($imgPath) }}" alt="{{ $event->title }} image {{ $index + 1 }}" class="w-full h-full object-cover">
+                            </div>
+                        @endforeach
+                        
+                        <!-- Slider Controls -->
+                        <div x-show="total > 1" class="absolute inset-x-0 bottom-4 flex justify-center gap-2 z-10">
+                            @foreach($allImages as $index => $imgPath)
+                                <button @click="activeIndex = {{ $index }}" 
+                                        class="w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-sm"
+                                        :class="activeIndex === {{ $index }} ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/80'"></button>
+                            @endforeach
+                        </div>
+                        
+                        <!-- Prev/Next Controls -->
+                        <div x-show="total > 1" class="absolute inset-y-0 left-4 flex items-center z-10" x-cloak>
+                            <button @click="activeIndex = activeIndex === 0 ? total - 1 : activeIndex - 1" class="w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white flex items-center justify-center transition-colors focus:outline-none">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </button>
+                        </div>
+                        <div x-show="total > 1" class="absolute inset-y-0 right-4 flex items-center z-10" x-cloak>
+                            <button @click="activeIndex = activeIndex === total - 1 ? 0 : activeIndex + 1" class="w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white flex items-center justify-center transition-colors focus:outline-none">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
                     @else
                         <div class="absolute inset-0 bg-gradient-to-tr from-white/20 dark:from-white/10 to-transparent"></div>
                         <span class="relative text-7xl opacity-40 mix-blend-overlay transition-opacity">🎟️</span>
                     @endif
 
-                    <div class="absolute top-6 left-6 flex flex-wrap gap-2">
+                    <div class="absolute top-6 left-6 flex flex-wrap gap-2 z-20">
                         <span class="bg-white/90 dark:bg-black/90 backdrop-blur-sm border border-black/5 dark:border-white/5 text-gray-800 dark:text-gray-200 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md shadow-sm transition-colors">
                             {{ $event->category->name }}
                         </span>
