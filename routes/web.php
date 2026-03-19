@@ -64,4 +64,11 @@ Route::get('/api/events', function () {
     return EventResource::collection($events);
 })->name('api.events');
 
+// --- Developer Mail Preview Route ---
+Route::get('/preview-reminder', function () {
+    $event = Event::first();
+    $booking = App\Models\Booking::first();
+    return new App\Mail\EventReminder($event, $booking);
+});
+
 require __DIR__.'/auth.php';
