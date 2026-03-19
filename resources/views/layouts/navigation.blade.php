@@ -19,12 +19,14 @@
                         <a href="{{ route('bookings.index') }}" class="text-sm font-semibold transition-colors duration-200 {{ request()->routeIs('bookings.index') ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white' }}">
                             My Tickets
                         </a>
-                        <a href="{{ route('dashboard') }}" class="text-sm font-semibold transition-colors duration-200 {{ request()->routeIs('dashboard') ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white' }}">
-                            Dashboard
-                        </a>
-                        <a href="{{ route('scan') }}" class="text-sm font-semibold transition-colors duration-200 {{ request()->routeIs('scan') ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white' }}">
-                            Scan Tickets
-                        </a>
+                        @if(Auth::user()->is_organizer)
+                            <a href="{{ route('dashboard') }}" class="text-sm font-semibold transition-colors duration-200 {{ request()->routeIs('dashboard') ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white' }}">
+                                Dashboard
+                            </a>
+                            <a href="{{ route('scan') }}" class="text-sm font-semibold transition-colors duration-200 {{ request()->routeIs('scan') ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white' }}">
+                                Scan Tickets
+                            </a>
+                        @endif
                         @if(Auth::user()->is_admin)
                             <a href="{{ route('admin.dashboard') }}" class="text-sm font-semibold transition-colors duration-200 {{ request()->routeIs('admin.*') ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white' }}">
                                 Admin
@@ -101,12 +103,14 @@
                 <a href="{{ route('bookings.index') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('bookings.index') ? 'border-black dark:border-white text-black dark:text-white font-bold bg-gray-50 dark:bg-white/10' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-gray-600' }} text-base font-medium transition duration-150 ease-in-out">
                     My Tickets
                 </a>
-                <a href="{{ route('dashboard') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('dashboard') ? 'border-black dark:border-white text-black dark:text-white font-bold bg-gray-50 dark:bg-white/10' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-gray-600' }} text-base font-medium transition duration-150 ease-in-out">
-                    Dashboard
-                </a>
-                <a href="{{ route('scan') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('scan') ? 'border-black dark:border-white text-black dark:text-white font-bold bg-gray-50 dark:bg-white/10' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-gray-600' }} text-base font-medium transition duration-150 ease-in-out">
-                    Scan Tickets
-                </a>
+                @if(Auth::user()->is_organizer)
+                    <a href="{{ route('dashboard') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('dashboard') ? 'border-black dark:border-white text-black dark:text-white font-bold bg-gray-50 dark:bg-white/10' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-gray-600' }} text-base font-medium transition duration-150 ease-in-out">
+                        Dashboard
+                    </a>
+                    <a href="{{ route('scan') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('scan') ? 'border-black dark:border-white text-black dark:text-white font-bold bg-gray-50 dark:bg-white/10' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-gray-600' }} text-base font-medium transition duration-150 ease-in-out">
+                        Scan Tickets
+                    </a>
+                @endif
                 @if(Auth::user()->is_admin)
                     <a href="{{ route('admin.dashboard') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('admin.*') ? 'border-black dark:border-white text-black dark:text-white font-bold bg-gray-50 dark:bg-white/10' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-gray-600' }} text-base font-medium transition duration-150 ease-in-out">
                         Admin

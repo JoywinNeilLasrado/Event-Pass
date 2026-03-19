@@ -67,6 +67,16 @@
             <x-input-error class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" :messages="$errors->get('profile_picture')" />
         </div>
 
+        <!-- Organizer Preference -->
+        <div class="mt-4 flex items-center">
+            <input id="is_organizer" type="checkbox" name="is_organizer" value="1" 
+                   {{ $user->is_organizer ? 'checked' : '' }}
+                   class="form-checkbox h-5 w-5 text-black border-gray-200 dark:border-white/10 dark:bg-black/20 dark:checked:bg-white dark:checked:border-transparent rounded transition focus:ring-black dark:focus:ring-white">
+            <label for="is_organizer" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors">
+                Organizer Mode (Enable Dashboard & Event Creation)
+            </label>
+        </div>
+
         <div class="flex items-center gap-4 pt-2">
             <button type="submit" class="btn-vercel px-6 py-2.5">Save</button>
 

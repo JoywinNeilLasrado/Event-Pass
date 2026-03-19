@@ -32,6 +32,8 @@ class ProfileController extends Controller
                 ->store('profile_pictures', 'public');
         }
 
+        $data['is_organizer'] = $request->has('is_organizer');
+
         $user->fill($data);
 
         if ($user->isDirty('email')) {

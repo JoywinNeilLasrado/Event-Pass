@@ -33,7 +33,11 @@
 
                 @if (Route::has('login'))
                     @auth
-                        <a href="{{ url('/dashboard') }}" class="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">Dashboard</a>
+                        @if(Auth::user()->is_organizer)
+                            <a href="{{ url('/dashboard') }}" class="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">Dashboard</a>
+                        @else
+                            <a href="{{ route('bookings.index') }}" class="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">My Tickets</a>
+                        @endif
                     @else
                         <a href="{{ route('login') }}" class="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">Log in</a>
                         @if (Route::has('register'))
@@ -68,8 +72,18 @@
             </p>
             
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 relative z-20">
-                <a href="{{ route('register') }}" class="btn-vercel text-lg px-10 py-4 w-full sm:w-auto shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300">Start Building Events</a>
-                <a href="{{ route('events.index') }}" class="btn-vercel-secondary text-lg px-10 py-4 w-full sm:w-auto bg-white/50 dark:bg-white/5 backdrop-blur-md border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-all duration-300 text-gray-900 dark:text-white">Explore Events</a>
+                @auth
+                    @if(Auth::user()->is_organizer)
+                        <a href="{{ route('events.create') }}" class="btn-vercel text-lg px-10 py-4 w-full sm:w-auto shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300">Create an Event</a>
+                        <a href="{{ route('dashboard') }}" class="btn-vercel-secondary text-lg px-10 py-4 w-full sm:w-auto bg-white/50 dark:bg-white/5 backdrop-blur-md border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-all duration-300 text-gray-900 dark:text-white">My Dashboard</a>
+                    @else
+                        <a href="{{ route('events.index') }}" class="btn-vercel text-lg px-10 py-4 w-full sm:w-auto shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300">Explore Events</a>
+                        <a href="{{ route('bookings.index') }}" class="btn-vercel-secondary text-lg px-10 py-4 w-full sm:w-auto bg-white/50 dark:bg-white/5 backdrop-blur-md border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-all duration-300 text-gray-900 dark:text-white">My Tickets</a>
+                    @endif
+                @else
+                    <a href="{{ route('register') }}" class="btn-vercel text-lg px-10 py-4 w-full sm:w-auto shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300">Start Building Events</a>
+                    <a href="{{ route('events.index') }}" class="btn-vercel-secondary text-lg px-10 py-4 w-full sm:w-auto bg-white/50 dark:bg-white/5 backdrop-blur-md border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-all duration-300 text-gray-900 dark:text-white">Explore Events</a>
+                @endauth
             </div>
             
             <!-- Beautiful Dashboard Mockup -->

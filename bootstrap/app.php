@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'event.owner' => \App\Http\Middleware\EnsureUserOwnsEvent::class,
             'admin'       => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'organizer'   => \App\Http\Middleware\EnsureUserIsOrganizer::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -34,6 +34,15 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" />
         </div>
 
+        <!-- Organizer Preference -->
+        <div class="mt-4 flex items-center">
+            <input id="is_organizer" type="checkbox" name="is_organizer" value="1" 
+                   class="form-checkbox h-5 w-5 text-black border-gray-300 dark:border-white/20 dark:bg-white/10 dark:checked:bg-white dark:checked:border-transparent rounded transition focus:ring-black dark:focus:ring-white">
+            <label for="is_organizer" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                I want to organize events on this platform
+            </label>
+        </div>
+
         <button type="submit" class="btn-vercel w-full py-3 mt-6">
             Register
         </button>

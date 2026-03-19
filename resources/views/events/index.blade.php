@@ -57,8 +57,24 @@
                     @endauth
                 </div>
             @else
-                
-                @if(isset($myEvents) && $myEvents->isNotEmpty())
+                @auth
+                @if(Auth::user()->is_organizer)
+                    <div class="col-span-full border border-gray-100 dark:border-white/10 rounded-2xl bg-white dark:bg-black/20 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+                        <div class="relative z-10 flex-1">
+                            <span class="inline-block px-3 py-1 bg-black text-white dark:bg-white dark:text-black rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 shadow-sm">Organizer Mode</span>
+                            <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">Create a New Event</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium max-w-xl">Host an amazing experience. Set up ticket types, manage attendees, and track your success all in one place.</p>
+                        </div>
+                        <div class="relative z-10 w-full md:w-auto shrink-0 flex flex-col sm:flex-row gap-3">
+                            <a href="{{ route('dashboard') }}" class="btn-vercel-secondary text-sm px-6 py-3 shrink-0 flex justify-center">View Analytics</a>
+                            <a href="{{ route('events.create') }}" class="btn-vercel text-sm px-6 py-3 shrink-0 flex justify-center items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Create Event
+                            </a>
+                        </div>
+                    </div>
+                @endif
+            @endauth
+                @if(Auth::check() && Auth::user()->is_organizer && isset($myEvents) && $myEvents->isNotEmpty())
                     <div class="mb-12">
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">My Created Events</h3>

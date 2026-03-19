@@ -14,19 +14,19 @@ Route::get('/', function () {
 use App\Http\Controllers\DashboardController;
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'organizer'])
     ->name('dashboard');
 
 Route::get('/scan', function () {
     return view('scan');
-})->middleware('auth')->name('scan');
+})->middleware(['auth', 'organizer'])->name('scan');
 
 // --- Event Routes ---
 // IMPORTANT: 'create' must come BEFORE '{event}' to avoid route conflict
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 
 // Auth-only: create form (must be above show/{event})
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'organizer'])->group(function () {
     Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
 });
