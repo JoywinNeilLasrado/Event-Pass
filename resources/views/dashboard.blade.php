@@ -22,6 +22,26 @@
                 <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-lg px-4 py-3 text-sm font-semibold shadow-sm transition-colors">{{ session('error') }}</div>
             @endif
 
+            {{-- Connect Stripe Banner --}}
+            @if(Auth::user()->is_organizer && !Auth::user()->stripe_onboarding_completed)
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800/30 rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm transition-colors">
+                    <div>
+                        <h3 class="text-lg font-extrabold text-indigo-900 dark:text-indigo-100 flex items-center gap-2">
+                            <span class="flex h-3 w-3 relative">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                            </span>
+                            Action Required: Connect Payouts
+                        </h3>
+                        <p class="text-indigo-700 dark:text-indigo-300 text-sm mt-1.5 font-medium">To start selling tickets and receiving automated payouts directly to your bank, please connect with Stripe.</p>
+                    </div>
+                    <a href="{{ route('stripe.connect') }}" class="inline-flex items-center justify-center px-6 py-3 bg-[#635BFF] hover:bg-[#5851E3] text-white font-bold text-sm rounded-lg transition-all shadow hover:shadow-lg whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#635BFF]">
+                        <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        Connect with Stripe
+                    </a>
+                </div>
+            @endif
+
             {{-- ── ORGANIZER ANALYTICS ── --}}
             <div class="mb-8">
                 <h3 class="font-bold text-gray-900 dark:text-white tracking-tight transition-colors mb-4">Organizer Overview</h3>

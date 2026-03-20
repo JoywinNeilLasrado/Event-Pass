@@ -106,7 +106,7 @@ class BookingController extends Controller
             $successUrl = route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}';
             $cancelUrl = route('payment.cancel') . '?session_id={CHECKOUT_SESSION_ID}';
 
-            $stripeSession = \Stripe\Checkout\Session::create([
+            $sessionConfig = [
                 'payment_method_types' => ['card'],
                 'line_items' => [[
                     'price_data' => [
@@ -122,7 +122,23 @@ class BookingController extends Controller
                 'mode' => 'payment',
                 'success_url' => $successUrl,
                 'cancel_url' => $cancelUrl,
-            ]);
+            ];
+
+            // If the organizer has connected their Stripe account for direct payouts
+            if ($event->user->stripe_account_id && $event->user->stripe_onboarding_completed) {
+                // Determine platform fee. Defaulting to 10%
+                $feePercent = \App\Models\Setting::getVal('ticket_fee_percent', 10);
+                $feeAmount = (int) ($finalPrice * 100 * ($feePercent / 100));
+
+                $sessionConfig['payment_intent_data'] = [
+                    'application_fee_amount' => $feeAmount,
+                    'transfer_data' => [
+                        'destination' => $event->user->stripe_account_id,
+                    ],
+                ];
+            }
+
+            $stripeSession = \Stripe\Checkout\Session::create($sessionConfig);
 
             $booking->update(['stripe_session_id' => $stripeSession->id]);
 

@@ -11,6 +11,7 @@ use App\Http\Resources\EventResource;
 use App\Models\Event;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UpgradeController;
+use App\Http\Controllers\StripeConnectController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
@@ -86,6 +87,13 @@ Route::middleware('auth')->group(function () {
 
 // Organizers
 Route::get('/organizers/{user}', [OrganizerController::class, 'show'])->name('organizers.show');
+
+// Stripe Connect
+Route::middleware(['auth', 'organizer'])->group(function () {
+    Route::get('/organizer/stripe/connect', [StripeConnectController::class, 'connect'])->name('stripe.connect');
+    Route::get('/organizer/stripe/return', [StripeConnectController::class, 'returnFromStripe'])->name('stripe.connect.return');
+    Route::get('/organizer/stripe/refresh', [StripeConnectController::class, 'refresh'])->name('stripe.connect.refresh');
+});
 
 // Ticket Verification (Public but protected by Signed URL)
 Route::get('/tickets/verify/{booking}', [BookingController::class, 'verifyTicket'])->name('tickets.verify')->middleware('signed');
