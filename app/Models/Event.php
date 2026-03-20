@@ -24,6 +24,9 @@ class Event extends Model
         'poster_image',
         'images',
         'is_featured',
+        'is_published',
+        'payment_status',
+        'stripe_session_id',
     ];
 
     protected $casts = [

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'EventPass') }}</title>
+        <title>{{ config('app.name', 'Passage') }}</title>
         
         @stack('meta')
 
@@ -41,7 +41,7 @@
             
             <footer class="border-t border-white/20 dark:border-white/10 bg-white/30 dark:bg-black/30 backdrop-blur-xl py-12 mt-auto text-center text-sm text-gray-700 dark:text-gray-400">
                 <div class="max-w-7xl mx-auto px-6">
-                    &copy; {{ date('Y') }} Eventpass. Built with premium glassmorphism design.
+                    &copy; {{ date('Y') }} Passage. Built with premium glassmorphism design.
                 </div>
             </footer>
         </div>

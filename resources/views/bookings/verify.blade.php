@@ -97,7 +97,7 @@
     </div>
     
     <div class="mt-8 text-center text-xs text-gray-500 dark:text-gray-500 font-medium tracking-wide">
-        Powered by EventPass Verification System
+        Powered by Passage Verification System
     </div>
 
 </body>

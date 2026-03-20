@@ -67,16 +67,48 @@
             <x-input-error class="mt-2 text-xs font-semibold text-red-500 dark:text-red-400" :messages="$errors->get('profile_picture')" />
         </div>
 
-        <!-- Organizer Preference -->
-        <div class="mt-6 flex items-center justify-between p-4 rounded-xl border border-gray-200/60 dark:border-white/10 bg-white/50 dark:bg-white/5 transition-colors">
+        <!-- Organizer Status -->
+        <div class="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-gray-200/60 dark:border-white/10 bg-white/50 dark:bg-white/5 transition-colors">
             <div>
-                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Organizer Mode</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Enable access to the Dashboard and Event Creation tools.</p>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Organizer Account</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                   @if(!$user->is_organizer)
+                      Host your own events, scan tickets, and access analytics.
+                   @elseif($user->has_unlimited_events)
+                      You are currently on the Pro Plan (Unlimited Free Events).
+                   @else
+                      You are on the Basic Pay-As-You-Go Plan.
+                   @endif
+                </p>
             </div>
-            <label for="is_organizer" class="relative inline-flex items-center cursor-pointer shrink-0">
-                <input type="checkbox" id="is_organizer" name="is_organizer" value="1" class="sr-only peer" {{ $user->is_organizer ? 'checked' : '' }}>
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-white/10 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:after:border-gray-600 peer-checked:bg-black dark:peer-checked:bg-white dark:peer-checked:after:bg-black transition-colors duration-300"></div>
-            </label>
+            
+            <div class="flex items-center gap-4">
+                @if (!$user->is_organizer)
+                    <a href="{{ route('upgrade.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-xs font-bold rounded-lg text-indigo-700 bg-indigo-100 hover:bg-indigo-200 dark:text-indigo-300 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Upgrade Now
+                    </a>
+                @else
+                    @if ($user->has_unlimited_events)
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 shadow-sm border border-green-200/50 dark:border-green-800/50">
+                            <svg class="mr-1.5 h-3 w-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                            Pro Active
+                        </span>
+                    @else
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-800/50">
+                            <svg class="mr-1.5 h-3 w-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                            Basic Active
+                        </span>
+                        <a href="{{ route('upgrade.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors underline decoration-2 underline-offset-4">
+                            Go Pro
+                        </a>
+                    @endif
+                    
+                    <label class="flex items-center gap-2 cursor-pointer ml-2 group">
+                        <input type="checkbox" name="cancel_organizer" value="1" class="w-4 h-4 rounded border-red-300 dark:border-red-500/30 text-red-600 focus:ring-red-500/50 dark:bg-black/50 transition-colors">
+                        <span class="text-xs font-bold text-red-600 group-hover:text-red-800 dark:text-red-400 dark:group-hover:text-red-300 transition-colors">Cancel Plan on Save</span>
+                    </label>
+                @endif
+            </div>
         </div>
 
         <div class="flex items-center gap-4 pt-2">

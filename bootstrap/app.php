@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'stripe/webhook',
+        ]);
+        
         $middleware->alias([
             'event.owner' => \App\Http\Middleware\EnsureUserOwnsEvent::class,
             'admin'       => \App\Http\Middleware\EnsureUserIsAdmin::class,

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'EventPass') }}</title>
+    <title>{{ config('app.name', 'Passage') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Dark Mode Checker -->
@@ -21,7 +21,7 @@
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="text-2xl">🎟️</span>
-                <span class="font-extrabold text-xl tracking-tighter text-gray-900 dark:text-white transition-colors">EventPass.</span>
+                <span class="font-extrabold text-xl tracking-tighter text-gray-900 dark:text-white transition-colors">Passage.</span>
             </div>
             
             <nav class="flex items-center gap-6">
@@ -59,7 +59,7 @@
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                 </span>
-                EventPass 2.0 is now live
+                Passage 2.0 is now live
             </div>
             
             <h1 class="text-6xl sm:text-7xl md:text-8xl font-extrabold tracking-tighter text-[#111827] dark:text-white leading-[1.05] mb-8 transition-colors">
@@ -166,10 +166,10 @@
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-2">
                 <span class="text-xl">🎟️</span>
-                <span class="font-bold text-lg tracking-tight text-gray-900 dark:text-white transition-colors">EventPass.</span>
+                <span class="font-bold text-lg tracking-tight text-gray-900 dark:text-white transition-colors">Passage.</span>
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-400 font-medium transition-colors">
-                &copy; {{ date('Y') }} EventPass. Built with Laravel and Tailwind CSS.
+                &copy; {{ date('Y') }} Passage. Built with Laravel and Tailwind CSS.
             </div>
         </div>
     </footer>

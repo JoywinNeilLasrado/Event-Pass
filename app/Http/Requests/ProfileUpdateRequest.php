@@ -28,7 +28,6 @@ class ProfileUpdateRequest extends FormRequest
             ],
             'bio'             => ['nullable', 'string', 'max:1000'],
             'profile_picture' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'is_organizer'    => ['boolean'],
         ];
     }
 }

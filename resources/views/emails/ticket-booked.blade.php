@@ -35,7 +35,7 @@
             </div>
         </div>
         <div class="footer">
-            &copy; {{ date('Y') }} EventPass. All rights reserved.
+            &copy; {{ date('Y') }} Passage. All rights reserved.
         </div>
     </div>
 </body>

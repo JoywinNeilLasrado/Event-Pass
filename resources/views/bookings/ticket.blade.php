@@ -28,7 +28,7 @@
                 @if($booking->ticketType)
                     <p style="color: #ecc94b; font-weight: bold; font-size: 16px; letter-spacing: 2px;">{{ strtoupper($booking->ticketType->name) }} TICKET</p>
                 @else
-                    <p>EventPass Official Ticket</p>
+                    <p>Passage Official Ticket</p>
                 @endif
             </div>
             <div class="ticket-body">
@@ -74,7 +74,7 @@
             </div>
         </div>
         <div class="footer">
-            Generated via EventPass on {{ now()->format('F j, Y, g:i a') }}<br>
+            Generated via Passage on {{ now()->format('F j, Y, g:i a') }}<br>
             Please present this ticket at the venue.
         </div>
     </div>

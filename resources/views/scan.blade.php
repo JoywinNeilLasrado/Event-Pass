@@ -11,7 +11,7 @@
                 
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">QR Ticket Scanner</h3>
                 <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-lg mx-auto">
-                    Point your camera at an attendee's digital or printed EventPass ticket. The scanner will automatically verify the signature and checking status.
+                    Point your camera at an attendee's digital or printed Passage ticket. The scanner will automatically verify the signature and checking status.
                 </p>
 
                 <div class="max-w-md mx-auto relative group">
@@ -46,7 +46,7 @@
                     // Redirect to the verification URL to immediately display the valid/invalid ticket screen!
                     window.location.href = decodedText;
                 } else {
-                    alert("Invalid QR Code scanned. This is not an EventPass ticket.");
+                    alert("Invalid QR Code scanned. This is not a Passage ticket.");
                 }
             }
 

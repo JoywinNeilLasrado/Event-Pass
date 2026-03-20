@@ -28,7 +28,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $redirect = \Illuminate\Support\Facades\Auth::user()->is_organizer 
+            ? route('dashboard', absolute: false) 
+            : route('events.index', absolute: false);
+
+        return redirect()->intended($redirect);
     }
 
     /**

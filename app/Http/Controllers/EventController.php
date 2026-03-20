@@ -14,7 +14,9 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Event::with(['category', 'user', 'tags', 'ticketTypes', 'bookings'])->latest();
+        $query = Event::with(['category', 'user', 'tags', 'ticketTypes', 'bookings'])
+            ->where('is_published', true)
+            ->latest();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -74,11 +76,45 @@ class EventController extends Controller
         $data['available_tickets'] = collect($data['tickets'])->sum('capacity');
         $data['is_featured'] = $request->boolean('is_featured');
 
+        $eventFee = (int) \App\Models\Setting::getVal('event_fee', 100);
+        if (auth()->user()->has_unlimited_events) {
+            $eventFee = 0;
+        }
+        
+        $data['is_published'] = ($eventFee <= 0);
+        $data['payment_status'] = ($eventFee > 0) ? 'pending' : 'free';
+
         $event = Event::create($data);
         $event->tags()->sync($request->input('tags', []));
 
         foreach ($data['tickets'] as $ticketData) {
             $event->ticketTypes()->create($ticketData);
+        }
+
+        if ($eventFee > 0) {
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+            $stripeSession = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'inr',
+                        'unit_amount' => $eventFee * 100,
+                        'product_data' => [
+                            'name' => 'Event Publishing Fee',
+                            'description' => 'Publishing fee for ' . $event->title,
+                        ],
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'client_reference_id' => 'event_' . $event->id,
+                'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('payment.cancel') . '?session_id={CHECKOUT_SESSION_ID}',
+            ]);
+
+            $event->update(['stripe_session_id' => $stripeSession->id]);
+
+            return redirect()->away($stripeSession->url);
         }
 
         return redirect()->route('events.show', $event)
@@ -87,6 +123,10 @@ class EventController extends Controller
 
     public function show(Event $event)
     {
+        if (!$event->is_published && (!auth()->check() || auth()->id() !== $event->user_id)) {
+            abort(404, 'Event not found or not published.');
+        }
+
         // Increment the page views to calculate conversion rate later
         $event->increment('views');
 

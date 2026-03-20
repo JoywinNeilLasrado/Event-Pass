@@ -9,7 +9,11 @@ use App\Http\Controllers\WaitlistController;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UpgradeController;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
 
 Route::get('/', function () {
     $featuredEvents = \App\Models\Event::where('is_featured', true)
@@ -64,12 +68,20 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Upgrade
+    Route::get('/upgrade', [UpgradeController::class, 'index'])->name('upgrade.index');
+    Route::post('/upgrade/basic', [UpgradeController::class, 'checkoutBasic'])->name('upgrade.basic');
+    Route::post('/upgrade/pro', [UpgradeController::class, 'checkoutPro'])->name('upgrade.pro');
+    Route::post('/upgrade/cancel', [UpgradeController::class, 'cancel'])->name('upgrade.cancel');
+
     // Bookings
     Route::get('/my-tickets', [BookingController::class, 'index'])->name('bookings.index');
     Route::post('/events/{event}/book', [BookingController::class, 'store'])->name('bookings.store');
     Route::delete('/events/{event}/cancel', [BookingController::class, 'destroy'])->name('bookings.destroy');
     Route::post('/events/{event}/waitlist', [WaitlistController::class, 'store'])->name('waitlists.store');
     Route::get('/events/{event}/ticket', [BookingController::class, 'downloadTicket'])->name('bookings.ticket');
+    Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
 });
 
 // Organizers

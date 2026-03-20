@@ -47,7 +47,7 @@ class TicketBooked extends Mailable implements ShouldQueue
         $pdf = Pdf::loadView('bookings.ticket', compact('booking', 'event', 'qrCode'));
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'EventPass-Ticket-' . $event->id . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'Passage-Ticket-' . $event->id . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }

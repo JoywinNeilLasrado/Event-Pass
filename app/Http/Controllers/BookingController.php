@@ -67,7 +67,9 @@ class BookingController extends Controller
             $finalPrice = max(0, $finalPrice);
         }
 
-        $updated = DB::transaction(function () use ($event, $ticketType, $promoCode, $finalPrice) {
+        $booking = null;
+
+        $updated = DB::transaction(function () use ($event, $ticketType, $promoCode, $finalPrice, &$booking) {
             $event = Event::lockForUpdate()->find($event->id);
             $ticketType = \App\Models\TicketType::lockForUpdate()->find($ticketType->id);
 
@@ -83,11 +85,12 @@ class BookingController extends Controller
                 $promoCode->increment('uses');
             }
 
-            $event->bookings()->create([
+            $booking = $event->bookings()->create([
                 'user_id' => auth()->id(),
                 'ticket_type_id' => $ticketType->id,
                 'promo_code_id' => $promoCode ? $promoCode->id : null,
-                'amount_paid' => $finalPrice
+                'amount_paid' => $finalPrice,
+                'payment_status' => $finalPrice > 0 ? 'pending' : 'free',
             ]);
 
             return true;
@@ -97,13 +100,41 @@ class BookingController extends Controller
             return back()->with('error', 'Sorry, tickets or promo code are no longer available for this event.');
         }
 
-        $booking = $event->bookings()->where('user_id', auth()->id())->latest()->first();
+        if ($finalPrice > 0) {
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+            
+            $successUrl = route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}';
+            $cancelUrl = route('payment.cancel') . '?session_id={CHECKOUT_SESSION_ID}';
+
+            $stripeSession = \Stripe\Checkout\Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'inr',
+                        'unit_amount' => (int) ($finalPrice * 100),
+                        'product_data' => [
+                            'name' => 'Ticket for ' . $event->title,
+                            'description' => $ticketType->name,
+                        ],
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+            ]);
+
+            $booking->update(['stripe_session_id' => $stripeSession->id]);
+
+            return redirect()->away($stripeSession->url);
+        }
+
         if ($booking) {
             Mail::to(auth()->user()->email)->send(new TicketBooked($booking));
         }
 
         if ($promoCode) {
-            return back()->with('success', 'Promo code applied! Ticket booked for $'.number_format($finalPrice, 2).'. 🎉');
+            return back()->with('success', 'Promo code applied! Ticket booked for $0.00. 🎉');
         }
 
         return back()->with('success', 'Ticket booked successfully! Enjoy the event! 🎉');
@@ -118,6 +149,21 @@ class BookingController extends Controller
         }
 
         $ticketTypeId = $booking->ticket_type_id;
+
+        // Process Refund if applicable
+        if ($booking->payment_status === 'paid' && $booking->stripe_session_id) {
+            try {
+                \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+                $session = \Stripe\Checkout\Session::retrieve($booking->stripe_session_id);
+                if ($session->payment_intent) {
+                    \Stripe\Refund::create([
+                        'payment_intent' => $session->payment_intent,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                return back()->with('error', 'Failed to process refund automatically. Please contact support. Error: ' . $e->getMessage());
+            }
+        }
 
         DB::transaction(function () use ($booking) {
             $booking->delete();
@@ -152,7 +198,7 @@ class BookingController extends Controller
 
         $pdf = Pdf::loadView('bookings.ticket', compact('booking', 'event', 'qrCode'));
 
-        return $pdf->stream('EventPass-Ticket-' . $event->id . '.pdf');
+        return $pdf->stream('Passage-Ticket-' . $event->id . '.pdf');
     }
 
     public function verifyTicket(Request $request, Booking $booking)

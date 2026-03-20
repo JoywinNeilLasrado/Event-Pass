@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('events.index') }}" class="text-black dark:text-white transition-colors duration-300 font-extrabold text-xl tracking-tighter">
-                        EventPass.
+                        Passage.
                     </a>
                 </div>
 
@@ -57,6 +57,13 @@
                         </x-slot>
 
                         <x-slot name="content">
+                            @if(!Auth::user()->is_organizer)
+                                <x-dropdown-link :href="route('upgrade.index')" class="!text-sm !font-bold !text-indigo-600 dark:!text-indigo-400 hover:!bg-indigo-50 dark:hover:!bg-indigo-900/20 transition-colors">
+                                    {{ __('Become an Organizer') }}
+                                </x-dropdown-link>
+                                <div class="border-t border-gray-100 dark:border-white/10 my-1"></div>
+                            @endif
+
                             <x-dropdown-link :href="route('profile.edit')" class="!text-sm !font-semibold !text-gray-700 dark:!text-gray-300 hover:!bg-gray-50 dark:hover:!bg-[#111] hover:!text-black dark:hover:!text-white transition-colors">
                                 {{ __('Profile Settings') }}
                             </x-dropdown-link>
@@ -128,6 +135,12 @@
                 </div>
 
                 <div class="mt-3 space-y-1">
+                    @if(!Auth::user()->is_organizer)
+                        <a href="{{ route('upgrade.index') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-indigo-600 dark:text-indigo-400 font-bold hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition duration-150 ease-in-out">
+                            Become an Organizer
+                        </a>
+                    @endif
+
                     <a href="{{ route('profile.edit') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-gray-600 text-base font-medium transition duration-150 ease-in-out">
                         Profile
                     </a>
