@@ -38,16 +38,31 @@
                                 
                                 <!-- Footer -->
                                 <div class="mt-6 pt-5 flex items-center justify-between border-t border-gray-100 dark:border-white/10 transition-colors">
-                                    <div class="flex items-center gap-2 {{ $event->remaining > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400' }} transition-colors">
-                                        <div class="w-1.5 h-1.5 rounded-full bg-current {{ $event->remaining > 0 ? 'animate-pulse' : '' }}"></div>
-                                        <span class="text-[11px] font-bold uppercase tracking-widest">
-                                            {{ $event->remaining > 0 ? $event->remaining . ' Tickets Left' : 'Sold Out' }}
-                                        </span>
-                                    </div>
+                                    @if(!$event->is_published && $event->payment_status === 'pending')
+                                        <div class="flex items-center gap-2 text-yellow-500 dark:text-yellow-400 transition-colors">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></div>
+                                            <span class="text-[11px] font-bold uppercase tracking-widest">
+                                                Payment Pending
+                                            </span>
+                                        </div>
+                                    @else
+                                        <div class="flex items-center gap-2 {{ $event->remaining > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400' }} transition-colors">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-current {{ $event->remaining > 0 ? 'animate-pulse' : '' }}"></div>
+                                            <span class="text-[11px] font-bold uppercase tracking-widest">
+                                                {{ $event->remaining > 0 ? $event->remaining . ' Tickets Left' : 'Sold Out' }}
+                                            </span>
+                                        </div>
+                                    @endif
                                     
-                                    <span class="text-sm font-semibold text-gray-400 dark:text-gray-500 group-hover:text-black dark:group-hover:text-white transition-colors flex items-center">
-                                        Details <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                                    </span>
+                                    @if(!$event->is_published && $event->payment_status === 'pending' && Auth::id() === $event->user_id)
+                                        <a href="{{ route('events.retry_publish_payment', $event) }}" class="inline-flex items-center justify-center px-4 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white font-bold text-[11px] uppercase tracking-widest rounded-md transition-all shadow hover:shadow-md">
+                                            Pay Now &rarr;
+                                        </a>
+                                    @else
+                                        <span class="text-sm font-semibold text-gray-400 dark:text-gray-500 group-hover:text-black dark:group-hover:text-white transition-colors flex items-center">
+                                            Details <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                         </div>

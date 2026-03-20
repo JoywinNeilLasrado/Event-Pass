@@ -22,10 +22,10 @@ return [
         'key' => env('RESEND_API_KEY'),
     ],
 
-    'stripe' => [
-        'key' => env('STRIPE_KEY'),
-        'secret' => env('STRIPE_SECRET'),
-        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    'cashfree' => [
+        'app_id' => env('CASHFREE_APP_ID'),
+        'secret_key' => env('CASHFREE_SECRET_KEY'),
+        'env' => env('CASHFREE_ENV', 'sandbox'),
     ],
 
     'ses' => [

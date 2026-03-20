@@ -26,7 +26,7 @@ class Event extends Model
         'is_featured',
         'is_published',
         'payment_status',
-        'stripe_session_id',
+        'cashfree_order_id',
     ];
 
     protected $casts = [

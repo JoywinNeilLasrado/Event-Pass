@@ -193,6 +193,14 @@
                             <div class="flex flex-col gap-3">
                                 @auth
                                     @if($event->user_id === auth()->id())
+                                        @if(!$event->is_published && $event->payment_status === 'pending')
+                                            <div class="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-2">
+                                                <p class="text-sm text-yellow-800 dark:text-yellow-300 font-medium mb-3">This event is currently unpublished pending the publishing fee payment. It is only visible to you.</p>
+                                                <a href="{{ route('events.retry_publish_payment', $event) }}" class="inline-flex items-center justify-center w-full px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold uppercase tracking-widest rounded-md transition-all shadow hover:shadow-md">
+                                                    Pay Now to Publish &rarr;
+                                                </a>
+                                            </div>
+                                        @endif
                                         <div class="flex gap-3">
                                             <a href="{{ route('events.edit', $event) }}" class="btn-vercel-secondary flex-1 text-center">Edit Event</a>
                                             <form action="{{ route('events.destroy', $event) }}" method="POST" class="flex" onsubmit="return confirm('Soft-delete this event? It can be restored later.')">

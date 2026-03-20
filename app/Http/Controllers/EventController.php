@@ -92,29 +92,47 @@ class EventController extends Controller
         }
 
         if ($eventFee > 0) {
-            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
-            $stripeSession = \Stripe\Checkout\Session::create([
-                'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'inr',
-                        'unit_amount' => $eventFee * 100,
-                        'product_data' => [
-                            'name' => 'Event Publishing Fee',
-                            'description' => 'Publishing fee for ' . $event->title,
-                        ],
-                    ],
-                    'quantity' => 1,
-                ]],
-                'mode' => 'payment',
-                'client_reference_id' => 'event_' . $event->id,
-                'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => route('payment.cancel') . '?session_id={CHECKOUT_SESSION_ID}',
-            ]);
+            $appId = config('services.cashfree.app_id');
+            $secretKey = config('services.cashfree.secret_key');
+            $env = config('services.cashfree.env', 'sandbox');
+            $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
 
-            $event->update(['stripe_session_id' => $stripeSession->id]);
+            $cashfreeOrderId = 'EVENT_' . $event->id . '_' . time();
 
-            return redirect()->away($stripeSession->url);
+            $orderPayload = [
+                'order_amount' => $eventFee,
+                'order_currency' => 'INR',
+                'order_id' => $cashfreeOrderId,
+                'customer_details' => [
+                    'customer_id' => (string) auth()->id(),
+                    'customer_name' => auth()->user()->name,
+                    'customer_email' => auth()->user()->email,
+                    'customer_phone' => '9999999999',
+                ],
+                'order_meta' => [
+                    'return_url' => route('payment.success') . '?order_id={order_id}',
+                    'notify_url' => route('cashfree.webhook'),
+                ]
+            ];
+
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'x-client-id' => $appId,
+                'x-client-secret' => $secretKey,
+                'x-api-version' => '2023-08-01',
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])->post($baseUrl . '/orders', $orderPayload);
+
+            if ($response->successful()) {
+                $event->update(['cashfree_order_id' => $cashfreeOrderId]);
+                return view('bookings.cashfree_checkout', [
+                    'paymentSessionId' => $response->json('payment_session_id'),
+                    'env' => $env
+                ]);
+            }
+
+            return redirect()->route('events.show', $event)
+                ->with('error', 'Event created but failed to initialize publishing payment.');
         }
 
         return redirect()->route('events.show', $event)
@@ -265,5 +283,71 @@ class EventController extends Controller
         return response($csv)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', 'attachment; filename="attendees_event_' . $event->id . '.csv"');
+    }
+
+    public function retryPublishPayment(Event $event)
+    {
+        if ($event->is_published || $event->payment_status === 'paid' || auth()->id() !== $event->user_id) {
+            return redirect()->route('dashboard');
+        }
+
+        $appId = config('services.cashfree.app_id');
+        $secretKey = config('services.cashfree.secret_key');
+        $env = config('services.cashfree.env', 'sandbox');
+        $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
+
+        if ($event->cashfree_order_id) {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'x-client-id' => $appId,
+                'x-client-secret' => $secretKey,
+                'x-api-version' => '2023-08-01',
+                'Accept' => 'application/json',
+            ])->get($baseUrl . '/orders/' . $event->cashfree_order_id);
+
+            if ($response->successful() && $response->json('order_status') === 'ACTIVE') {
+                return view('bookings.cashfree_checkout', [
+                    'paymentSessionId' => $response->json('payment_session_id'),
+                    'env' => $env
+                ]);
+            }
+        }
+
+        // If order EXPIRED, failed, or missing, we must proactively forge a newly timestamped order scope footprint
+        $eventFee = (int) \App\Models\Setting::getVal('event_fee', 100);
+        $cashfreeOrderId = 'EVENT_' . $event->id . '_' . time();
+        
+        $orderPayload = [
+            'order_amount' => $eventFee,
+            'order_currency' => 'INR',
+            'order_id' => $cashfreeOrderId,
+            'customer_details' => [
+                'customer_id' => (string) auth()->id(),
+                'customer_name' => auth()->user()->name,
+                'customer_email' => auth()->user()->email,
+                'customer_phone' => '9999999999',
+            ],
+            'order_meta' => [
+                'return_url' => route('payment.success') . '?order_id={order_id}',
+                'notify_url' => route('cashfree.webhook'),
+            ]
+        ];
+
+        $newResponse = \Illuminate\Support\Facades\Http::withHeaders([
+            'x-client-id' => $appId,
+            'x-client-secret' => $secretKey,
+            'x-api-version' => '2023-08-01',
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ])->post($baseUrl . '/orders', $orderPayload);
+
+        if ($newResponse->successful()) {
+            $event->update(['cashfree_order_id' => $cashfreeOrderId]);
+            return view('bookings.cashfree_checkout', [
+                'paymentSessionId' => $newResponse->json('payment_session_id'),
+                'env' => $env
+            ]);
+        }
+
+        return redirect()->route('dashboard')->with('error', 'Unable to initialize checkout. Please try again.');
     }
 }

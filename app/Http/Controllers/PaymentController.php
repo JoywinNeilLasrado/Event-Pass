@@ -6,107 +6,96 @@ use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TicketBooked;
-use Stripe\Stripe;
-use Stripe\Checkout\Session;
 
 class PaymentController extends Controller
 {
     public function success(Request $request)
     {
-        $session_id = $request->get('session_id');
-        if (!$session_id) {
+        $order_id = $request->get('order_id');
+        if (!$order_id) {
             return redirect()->route('events.index')->with('error', 'Invalid payment session.');
         }
 
-        Stripe::setApiKey(config('services.stripe.secret'));
-        $session = Session::retrieve($session_id);
+        $appId = config('services.cashfree.app_id');
+        $secretKey = config('services.cashfree.secret_key');
+        $env = config('services.cashfree.env', 'sandbox');
+        $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
 
-        if ($session->client_reference_id && str_starts_with($session->client_reference_id, 'upgrade_')) {
-            $userId = str_replace('upgrade_', '', $session->client_reference_id);
-            if ($session->payment_status === 'paid') {
-                \App\Models\User::where('id', $userId)->update([
-                    'is_organizer' => true,
-                    'has_unlimited_events' => true
-                ]);
-                return redirect()->route('dashboard')->with('success', 'Your account has been upgraded! You are now a Pro Organizer. 🎉');
-            }
-        } elseif ($session->client_reference_id && str_starts_with($session->client_reference_id, 'event_')) {
-            $eventId = str_replace('event_', '', $session->client_reference_id);
-            if ($session->payment_status === 'paid') {
-                \App\Models\Event::where('id', $eventId)->update(['is_published' => true, 'payment_status' => 'paid']);
-                return redirect()->route('dashboard')->with('success', 'Your event has been published successfully! 🎉');
-            }
+        $response = \Illuminate\Support\Facades\Http::withHeaders([
+            'x-client-id' => $appId,
+            'x-client-secret' => $secretKey,
+            'x-api-version' => '2023-08-01',
+            'Accept' => 'application/json',
+        ])->get($baseUrl . '/orders/' . $order_id);
+
+        if (!$response->successful() || $response->json('order_status') !== 'PAID') {
+            return redirect()->route('events.index')->with('error', 'Payment was not successful or is currently pending.');
+        }
+
+        if (str_starts_with($order_id, 'UPGRADE_')) {
+            $parts = explode('_', $order_id);
+            $userId = $parts[1];
+            \App\Models\User::where('id', $userId)->update([
+                'is_organizer' => true,
+                'has_unlimited_events' => true
+            ]);
+            return redirect()->route('dashboard')->with('success', 'Your account has been upgraded! You are now a Pro Organizer. 🎉');
+        } elseif (str_starts_with($order_id, 'EVENT_')) {
+            $parts = explode('_', $order_id);
+            $eventId = $parts[1];
+            \App\Models\Event::where('id', $eventId)->update(['is_published' => true, 'payment_status' => 'paid']);
+            return redirect()->route('dashboard')->with('success', 'Your event has been published successfully! 🎉');
         } else {
             // Ticket Booking
-            $booking = Booking::where('stripe_session_id', $session_id)->firstOrFail();
-            if ($session->payment_status === 'paid' && $booking->payment_status !== 'paid') {
+            $booking = Booking::where('cashfree_order_id', $order_id)->firstOrFail();
+            if ($booking->payment_status !== 'paid') {
                 $booking->update(['payment_status' => 'paid']);
                 Mail::to($booking->user->email)->send(new TicketBooked($booking));
             }
             return redirect()->route('bookings.index')->with('success', 'Payment successful! Your ticket has been booked! 🎉');
         }
-
-        return redirect()->route('events.index');
     }
 
     public function cancel(Request $request)
     {
-        $session_id = $request->get('session_id');
-        if ($session_id) {
-            try {
-                Stripe::setApiKey(config('services.stripe.secret'));
-                $session = Session::retrieve($session_id);
-
-                if ($session->client_reference_id && str_starts_with($session->client_reference_id, 'upgrade_')) {
-                    return redirect()->route('upgrade.index')->with('error', 'Upgrade cancelled.');
-                } elseif ($session->client_reference_id && str_starts_with($session->client_reference_id, 'event_')) {
-                    return redirect()->route('dashboard')->with('error', 'Event publication cancelled. The event remains a draft.');
-                } else {
-                    Booking::where('stripe_session_id', $session_id)->where('payment_status', 'pending')->delete();
-                }
-            } catch (\Exception $e) {
-                // Ignore retrieval errors on cancel
-            }
-        }
-        
+        // For cashfree we might drop here generally if they close the modal
         return redirect()->route('events.index')->with('error', 'Payment cancelled.');
     }
 
     public function webhook(Request $request)
     {
-        Stripe::setApiKey(config('services.stripe.secret'));
-        $endpoint_secret = config('services.stripe.webhook_secret');
-        
+        // Verify Cashfree Webhook Signature
         $payload = @file_get_contents('php://input');
-        $sig_header = $request->header('HTTP_STRIPE_SIGNATURE', '');
-        $event = null;
+        $signature = $request->header('x-webhook-signature');
+        $timestamp = $request->header('x-webhook-timestamp');
+        
+        $secretKey = config('services.cashfree.secret_key');
+        
+        $data = $timestamp . $payload;
+        $expectedSignature = base64_encode(hash_hmac('sha256', $data, $secretKey, true));
 
-        try {
-            if ($endpoint_secret) {
-                $event = \Stripe\Webhook::constructEvent($payload, $sig_header, $endpoint_secret);
-            } else {
-                $event = \Stripe\Event::constructFrom(json_decode($payload, true));
-            }
-        } catch(\UnexpectedValueException $e) {
-            return response()->json(['error' => 'Invalid payload'], 400);
-        } catch(\Stripe\Exception\SignatureVerificationException $e) {
+        if ($signature !== $expectedSignature) {
             return response()->json(['error' => 'Invalid signature'], 400);
         }
 
-        if ($event->type == 'checkout.session.completed') {
-            $session = $event->data->object;
+        $event = json_decode($payload, true);
 
-            if ($session->client_reference_id && str_starts_with($session->client_reference_id, 'upgrade_')) {
-                $userId = str_replace('upgrade_', '', $session->client_reference_id);
+        if (isset($event['type']) && $event['type'] == 'PAYMENT_SUCCESS_WEBHOOK') {
+            $order_id = $event['data']['order']['order_id'];
+
+            if (str_starts_with($order_id, 'UPGRADE_')) {
+                $parts = explode('_', $order_id);
+                $userId = $parts[1];
                 \App\Models\User::where('id', $userId)->update([
                     'is_organizer' => true,
                     'has_unlimited_events' => true
                 ]);
-            } elseif ($session->client_reference_id && str_starts_with($session->client_reference_id, 'event_')) {
-                $eventId = str_replace('event_', '', $session->client_reference_id);
+            } elseif (str_starts_with($order_id, 'EVENT_')) {
+                $parts = explode('_', $order_id);
+                $eventId = $parts[1];
                 \App\Models\Event::where('id', $eventId)->update(['is_published' => true, 'payment_status' => 'paid']);
             } else {
-                $booking = Booking::where('stripe_session_id', $session->id)->first();
+                $booking = Booking::where('cashfree_order_id', $order_id)->first();
                 if ($booking && $booking->payment_status !== 'paid') {
                     $booking->update(['payment_status' => 'paid']);
                     Mail::to($booking->user->email)->send(new TicketBooked($booking));

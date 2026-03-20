@@ -22,24 +22,97 @@
                 <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-lg px-4 py-3 text-sm font-semibold shadow-sm transition-colors">{{ session('error') }}</div>
             @endif
 
-            {{-- Connect Stripe Banner --}}
-            @if(Auth::user()->is_organizer && !Auth::user()->stripe_onboarding_completed)
-                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800/30 rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm transition-colors">
-                    <div>
-                        <h3 class="text-lg font-extrabold text-indigo-900 dark:text-indigo-100 flex items-center gap-2">
-                            <span class="flex h-3 w-3 relative">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
-                            </span>
-                            Action Required: Connect Payouts
-                        </h3>
-                        <p class="text-indigo-700 dark:text-indigo-300 text-sm mt-1.5 font-medium">To start selling tickets and receiving automated payouts directly to your bank, please connect with Stripe.</p>
+            {{-- Cashfree Connect UI --}}
+            @if(Auth::user()->is_organizer)
+                @if(!Auth::user()->cashfree_vendor_id)
+                    {{-- Connect Cashfree Form --}}
+                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800/30 rounded-xl p-6 shadow-sm transition-colors mb-8" x-data="{ showForm: false }">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-4 border-b border-blue-200/50 dark:border-blue-700/30 border-dashed" x-show="!showForm">
+                            <div>
+                                <h3 class="text-lg font-extrabold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                                    <span class="flex h-3 w-3 relative">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                                    </span>
+                                    Action Required: Add Payout Bank Account
+                                </h3>
+                                <p class="text-blue-700 dark:text-blue-300 text-sm mt-1.5 font-medium">To start selling tickets and receiving automated payouts via Cashfree, add your banking details.</p>
+                            </div>
+                            <button @click="showForm = true" type="button" class="inline-flex items-center justify-center px-6 py-3 bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-sm rounded-lg transition-all shadow hover:shadow-lg whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4f46e5]">
+                                Add Bank Account
+                            </button>
+                        </div>
+
+                        <div x-show="showForm" x-cloak class="mt-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                            <h3 class="text-lg font-bold text-blue-900 dark:text-blue-100 mb-4">Cashfree Vendor Payout Settings</h3>
+                            <form action="{{ route('cashfree.connect') }}" method="POST" class="space-y-4">
+                                @csrf
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Account Holder Name</label>
+                                        <input type="text" name="account_holder_name" required class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Bank Account Number</label>
+                                        <input type="text" name="bank_account_number" required class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">IFSC Code</label>
+                                        <input type="text" name="ifsc_code" required class="w-full uppercase rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">PAN Number</label>
+                                        <input type="text" name="pan_number" required placeholder="ABCDE1234F" class="w-full uppercase rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Account Type</label>
+                                        <select name="account_type" required class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                            <option value="INDIVIDUAL">Individual</option>
+                                            <option value="BUSINESS">Business</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Business Category</label>
+                                        <select name="business_type" required class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                            <option value="Social Media and Entertainment">Events & Entertainment</option>
+                                            <option value="Travel and Hospitality">Travel and Hospitality</option>
+                                            <option value="Education">Education</option>
+                                            <option value="Professional Services (Doctors, Lawyers, Architects, CAs, and other Professionals)">Professional Services</option>
+                                            <option value="E-commerce">E-commerce</option>
+                                            <option value="Miscellaneous">Miscellaneous / Others</option>
+                                        </select>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Business Mobile Number</label>
+                                        <input type="text" name="phone" required class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                    </div>
+                                </div>
+                                <div class="flex justify-end gap-3 mt-6">
+                                    <button type="button" @click="showForm = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 font-bold text-sm rounded-lg transition-colors border border-gray-300 dark:border-gray-600">Cancel</button>
+                                    <button type="submit" class="px-4 py-2 bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-sm rounded-lg transition-all shadow hover:shadow-lg">Verify & Save Bank</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <a href="{{ route('stripe.connect') }}" class="inline-flex items-center justify-center px-6 py-3 bg-[#635BFF] hover:bg-[#5851E3] text-white font-bold text-sm rounded-lg transition-all shadow hover:shadow-lg whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#635BFF]">
-                        <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                        Connect with Stripe
-                    </a>
-                </div>
+                @else
+                    {{-- Connected Banner --}}
+                    <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10 border border-emerald-200 dark:border-emerald-800/30 rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm transition-colors mb-8">
+                        <div>
+                            <h3 class="text-lg font-extrabold text-emerald-900 dark:text-emerald-100 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                Payouts Connected
+                            </h3>
+                            <p class="text-emerald-700 dark:text-emerald-300 text-sm mt-1.5 font-medium">Your bank account is successfully linked via Cashfree. Ticket sales will be automatically transferred.</p>
+                        </div>
+                        <form action="{{ route('cashfree.disconnect') }}" method="POST" onsubmit="return confirm('Are you sure you want to disconnect your bank account? You will stop receiving payouts.');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 font-bold text-sm rounded-lg transition-colors border border-red-200 dark:border-red-800/50 whitespace-nowrap">
+                                Remove Account
+                            </button>
+                        </form>
+                    </div>
+                @endif
             @endif
 
             {{-- ── ORGANIZER ANALYTICS ── --}}

@@ -101,48 +101,68 @@ class BookingController extends Controller
         }
 
         if ($finalPrice > 0) {
-            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
-            
-            $successUrl = route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}';
-            $cancelUrl = route('payment.cancel') . '?session_id={CHECKOUT_SESSION_ID}';
+            $appId = config('services.cashfree.app_id');
+            $secretKey = config('services.cashfree.secret_key');
+            $env = config('services.cashfree.env', 'sandbox');
+            $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
 
-            $sessionConfig = [
-                'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'inr',
-                        'unit_amount' => (int) ($finalPrice * 100),
-                        'product_data' => [
-                            'name' => 'Ticket for ' . $event->title,
-                            'description' => $ticketType->name,
-                        ],
-                    ],
-                    'quantity' => 1,
-                ]],
-                'mode' => 'payment',
-                'success_url' => $successUrl,
-                'cancel_url' => $cancelUrl,
-            ];
+            $cashfreeOrderId = 'ORDER_' . $booking->id . '_' . time();
 
-            // If the organizer has connected their Stripe account for direct payouts
-            if ($event->user->stripe_account_id && $event->user->stripe_onboarding_completed) {
-                // Determine platform fee. Defaulting to 10%
+            // Set up Easy Split if the organizer has linked a Cashfree Vendor Account
+            $vendorSplits = [];
+            if ($event->user->cashfree_vendor_id) {
                 $feePercent = \App\Models\Setting::getVal('ticket_fee_percent', 10);
-                $feeAmount = (int) ($finalPrice * 100 * ($feePercent / 100));
+                $platformCut = round($finalPrice * ($feePercent / 100), 2);
+                $vendorAmount = round($finalPrice - $platformCut, 2);
 
-                $sessionConfig['payment_intent_data'] = [
-                    'application_fee_amount' => $feeAmount,
-                    'transfer_data' => [
-                        'destination' => $event->user->stripe_account_id,
-                    ],
-                ];
+                if ($vendorAmount > 0) {
+                    $vendorSplits[] = [
+                        'vendor_id' => $event->user->cashfree_vendor_id,
+                        'amount' => $vendorAmount
+                    ];
+                }
             }
 
-            $stripeSession = \Stripe\Checkout\Session::create($sessionConfig);
+            $orderPayload = [
+                'order_amount' => round($finalPrice, 2),
+                'order_currency' => 'INR',
+                'order_id' => $cashfreeOrderId,
+                'customer_details' => [
+                    'customer_id' => (string) auth()->id(),
+                    'customer_name' => auth()->user()->name,
+                    'customer_email' => auth()->user()->email,
+                    'customer_phone' => '9999999999', // Cashfree mandatory default fallback
+                ],
+                'order_meta' => [
+                    'return_url' => route('payment.success') . '?order_id={order_id}',
+                    'notify_url' => route('cashfree.webhook'),
+                ]
+            ];
 
-            $booking->update(['stripe_session_id' => $stripeSession->id]);
+            if (!empty($vendorSplits)) {
+                $orderPayload['vendor_splits'] = $vendorSplits;
+            }
 
-            return redirect()->away($stripeSession->url);
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'x-client-id' => $appId,
+                'x-client-secret' => $secretKey,
+                'x-api-version' => '2023-08-01',
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])->post($baseUrl . '/orders', $orderPayload);
+
+            if ($response->successful()) {
+                $paymentSessionId = $response->json('payment_session_id');
+                // Store order ID mapped directly to our database cache
+                $booking->update(['cashfree_order_id' => $cashfreeOrderId]);
+                
+                return view('bookings.cashfree_checkout', [
+                    'paymentSessionId' => $paymentSessionId,
+                    'env' => $env
+                ]);
+            }
+
+            return back()->with('error', 'Payment gateway error: ' . $response->json('message', 'Unknown error'));
         }
 
         if ($booking) {
@@ -167,15 +187,23 @@ class BookingController extends Controller
         $ticketTypeId = $booking->ticket_type_id;
 
         // Process Refund if applicable
-        if ($booking->payment_status === 'paid' && $booking->stripe_session_id) {
+        if ($booking->payment_status === 'paid' && $booking->cashfree_order_id) {
             try {
-                \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
-                $session = \Stripe\Checkout\Session::retrieve($booking->stripe_session_id);
-                if ($session->payment_intent) {
-                    \Stripe\Refund::create([
-                        'payment_intent' => $session->payment_intent,
-                    ]);
-                }
+                $appId = config('services.cashfree.app_id');
+                $secretKey = config('services.cashfree.secret_key');
+                $env = config('services.cashfree.env', 'sandbox');
+                $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
+
+                \Illuminate\Support\Facades\Http::withHeaders([
+                    'x-client-id' => $appId,
+                    'x-client-secret' => $secretKey,
+                    'x-api-version' => '2023-08-01',
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ])->post($baseUrl . '/orders/' . $booking->cashfree_order_id . '/refunds', [
+                    'refund_amount' => $booking->amount_paid,
+                    'refund_id' => 'REF_' . $booking->id . '_' . time(),
+                ]);
             } catch (\Exception $e) {
                 return back()->with('error', 'Failed to process refund automatically. Please contact support. Error: ' . $e->getMessage());
             }

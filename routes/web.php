@@ -11,10 +11,10 @@ use App\Http\Resources\EventResource;
 use App\Models\Event;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UpgradeController;
-use App\Http\Controllers\StripeConnectController;
+use App\Http\Controllers\CashfreeController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
+Route::post('/cashfree/webhook', [PaymentController::class, 'webhook'])->name('cashfree.webhook');
 
 Route::get('/', function () {
     $featuredEvents = \App\Models\Event::where('is_featured', true)
@@ -56,6 +56,7 @@ Route::middleware(['auth', 'event.owner'])->group(function () {
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     Route::get('/events/{event}/attendees', [EventController::class, 'attendees'])->name('events.attendees');
     Route::get('/events/{event}/export', [EventController::class, 'exportAttendees'])->name('events.export');
+    Route::get('/events/{event}/pay', [EventController::class, 'retryPublishPayment'])->name('events.retry_publish_payment');
     
     // Promo Codes
     Route::get('/events/{event}/promo-codes', [PromoCodeController::class, 'index'])->name('promo_codes.index');
@@ -88,11 +89,10 @@ Route::middleware('auth')->group(function () {
 // Organizers
 Route::get('/organizers/{user}', [OrganizerController::class, 'show'])->name('organizers.show');
 
-// Stripe Connect
+// Cashfree Connect
 Route::middleware(['auth', 'organizer'])->group(function () {
-    Route::get('/organizer/stripe/connect', [StripeConnectController::class, 'connect'])->name('stripe.connect');
-    Route::get('/organizer/stripe/return', [StripeConnectController::class, 'returnFromStripe'])->name('stripe.connect.return');
-    Route::get('/organizer/stripe/refresh', [StripeConnectController::class, 'refresh'])->name('stripe.connect.refresh');
+    Route::post('/organizer/cashfree/connect', [CashfreeController::class, 'connect'])->name('cashfree.connect');
+    Route::delete('/organizer/cashfree/disconnect', [CashfreeController::class, 'disconnect'])->name('cashfree.disconnect');
 });
 
 // Ticket Verification (Public but protected by Signed URL)

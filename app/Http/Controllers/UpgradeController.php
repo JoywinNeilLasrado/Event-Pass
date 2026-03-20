@@ -27,29 +27,47 @@ class UpgradeController extends Controller
 
     public function checkoutPro(Request $request)
     {
-        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
         $fee = (int) Setting::getVal('organizer_fee', 500);
 
-        $stripeSession = \Stripe\Checkout\Session::create([
-            'payment_method_types' => ['card'],
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => 'inr',
-                    'unit_amount' => $fee * 100,
-                    'product_data' => [
-                        'name' => 'Passage Pro Organizer Upgrade',
-                        'description' => 'One-time fee to unlock unlimited free event publishing',
-                    ],
-                ],
-                'quantity' => 1,
-            ]],
-            'mode' => 'payment',
-            'client_reference_id' => 'upgrade_' . auth()->id(),
-            'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('upgrade.index'),
-        ]);
+        $appId = config('services.cashfree.app_id');
+        $secretKey = config('services.cashfree.secret_key');
+        $env = config('services.cashfree.env', 'sandbox');
+        $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
 
-        return redirect()->away($stripeSession->url);
+        $cashfreeOrderId = 'UPGRADE_' . auth()->id() . '_' . time();
+
+        $orderPayload = [
+            'order_amount' => $fee,
+            'order_currency' => 'INR',
+            'order_id' => $cashfreeOrderId,
+            'customer_details' => [
+                'customer_id' => (string) auth()->id(),
+                'customer_name' => auth()->user()->name,
+                'customer_email' => auth()->user()->email,
+                'customer_phone' => '9999999999',
+            ],
+            'order_meta' => [
+                'return_url' => route('payment.success') . '?order_id={order_id}',
+                'notify_url' => route('cashfree.webhook'),
+            ]
+        ];
+
+        $response = \Illuminate\Support\Facades\Http::withHeaders([
+            'x-client-id' => $appId,
+            'x-client-secret' => $secretKey,
+            'x-api-version' => '2023-08-01',
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ])->post($baseUrl . '/orders', $orderPayload);
+
+        if ($response->successful()) {
+            return view('bookings.cashfree_checkout', [
+                'paymentSessionId' => $response->json('payment_session_id'),
+                'env' => $env
+            ]);
+        }
+
+        return back()->with('error', 'Failed to initialize upgrade payment.');
     }
 
     public function cancel(Request $request)
