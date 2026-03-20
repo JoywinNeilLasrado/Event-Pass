@@ -4,7 +4,10 @@
             <h2 class="font-extrabold text-2xl text-gray-900 dark:text-white tracking-tight transition-colors">
                 Welcome, {{ explode(' ', Auth::user()->name)[0] }}
             </h2>
-            <a href="{{ route('events.index') }}" class="btn-vercel-secondary text-sm hidden sm:block">Browse Events</a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('profile.edit') }}" class="btn-vercel-secondary text-sm hidden sm:block">Edit Profile</a>
+                <a href="{{ route('events.index') }}" class="btn-vercel text-sm hidden sm:block">Browse Events</a>
+            </div>
         </div>
     </x-slot>
 

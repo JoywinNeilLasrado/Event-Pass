@@ -1,11 +1,27 @@
-<section>
-    <header>
-        <h2 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight transition-colors">
-            Profile Information
-        </h2>
-        <p class="mt-1 text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors">
-            Update your account's profile information and email address.
-        </p>
+<section x-data="{ editing: {{ $errors->updateProfile->isNotEmpty() ? 'true' : 'false' }} }">
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight transition-colors">
+                Profile Information
+            </h2>
+            <p class="mt-1 text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors">
+                Update your account's profile information and email address.
+            </p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            @if (session('status') === 'profile-updated' || session('status') === 'plan-canceled')
+                <p x-data="{ show: true }" x-show="show" x-transition.opacity.duration.500ms x-init="setTimeout(() => show = false, 3000)"
+                   class="flex items-center gap-1.5 text-xs font-bold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/40 px-3 py-1.5 rounded-lg transition-colors cursor-default whitespace-nowrap shadow-sm border border-green-200 dark:border-green-800/50">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    Profile Updated
+                </p>
+            @endif
+            
+            <button type="button" x-cloak x-show="!editing" @click="editing = true" class="btn-vercel-secondary text-sm px-5 py-2 whitespace-nowrap">
+                Edit Profile
+            </button>
+        </div>
     </header>
 
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
@@ -16,6 +32,7 @@
         @csrf
         @method('patch')
 
+        <fieldset x-bind:disabled="!editing" :class="{ 'opacity-60 pointer-events-none grayscale-[20%]': !editing }" class="space-y-5 transition-all duration-300 ease-in-out">
         <div>
             <label for="name" class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Name</label>
             <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name"
@@ -111,13 +128,11 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-4 pt-2">
-            <button type="submit" class="btn-vercel px-6 py-2.5">Save</button>
+        </fieldset>
 
-            @if (session('status') === 'profile-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                   class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest transition-colors">Saved.</p>
-            @endif
+        <div class="flex items-center gap-4 pt-4" x-show="editing" x-collapse x-cloak>
+            <button type="submit" class="btn-vercel px-6 py-2.5">Save Changes</button>
+            <button type="button" @click="editing = false" class="btn-vercel-secondary px-6 py-2.5">Cancel</button>
         </div>
     </form>
 </section>

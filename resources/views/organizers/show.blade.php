@@ -12,6 +12,15 @@
             </div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ $user->name }}</h1>
             <p class="text-gray-500 dark:text-gray-400">Discover upcoming events hosted by {{ $user->name }}.</p>
+            
+            @if(auth()->check() && auth()->id() === $user->id)
+                <div class="mt-6 flex justify-center">
+                    <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-5 py-2.5 bg-gray-100 dark:bg-white/10 border border-transparent rounded-xl font-bold text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors shadow-sm">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        Edit Profile
+                    </a>
+                </div>
+            @endif
         </div>
 
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Upcoming Events ({{ $events->count() }})</h2>

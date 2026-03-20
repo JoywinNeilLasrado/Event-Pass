@@ -1,8 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-2xl text-gray-900 dark:text-white tracking-tight transition-colors">
-            {{ __('Profile Settings') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-bold text-2xl text-gray-900 dark:text-white tracking-tight transition-colors">
+                {{ __('Profile Settings') }}
+            </h2>
+            <div class="flex items-center gap-3">
+                @if(Auth::user()->is_organizer)
+                    <a href="{{ route('organizers.show', Auth::id()) }}" class="btn-vercel-secondary text-sm hidden sm:block">View Public Profile</a>
+                @endif
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-12">
