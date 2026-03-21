@@ -239,9 +239,11 @@ class BookingController extends Controller
             return redirect()->guest(route('login'));
         }
 
-        // Hard block for any user who did not create this specific event
-        if (auth()->id() !== $event->user_id) {
-            abort(403, 'Security Violation: Only the registered event organizer can scan and verify tickets for this event.');
+        $isCreator = auth()->id() === $event->user_id;
+        $isStaff = auth()->user()->employer_id === $event->user_id;
+
+        if (!$isCreator && !$isStaff) {
+            abort(403, 'Security Violation: Only the registered event organizer or authorized staff can scan and verify tickets for this event.');
         }
 
         $isOwner = true;
@@ -253,8 +255,15 @@ class BookingController extends Controller
     {
         $event = $booking->event;
 
-        if (!auth()->check() || auth()->id() !== $event->user_id) {
-            abort(403, 'Unauthorized action. Only the event creator can check in attendees.');
+        if (!auth()->check()) {
+            abort(403, 'Unauthorized action. Please login first.');
+        }
+
+        $isCreator = auth()->id() === $event->user_id;
+        $isStaff = auth()->user()->employer_id === $event->user_id;
+
+        if (!$isCreator && !$isStaff) {
+            abort(403, 'Unauthorized action. Only the event creator or verified staff can check in attendees.');
         }
 
         if ($booking->is_checked_in) {

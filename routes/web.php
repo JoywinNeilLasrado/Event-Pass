@@ -32,8 +32,17 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::get('/scan', function () {
+    if (!auth()->user()->is_organizer && !auth()->user()->employer_id) {
+        abort(403, 'Access Denied: Only Organizers and their verified Staff can access the Scanner module.');
+    }
     return view('scan');
-})->middleware(['auth', 'organizer'])->name('scan');
+})->middleware(['auth'])->name('scan');
+
+// --- Team / Staff Management ---
+Route::middleware(['auth', 'organizer'])->group(function () {
+    Route::post('/team/staff', [\App\Http\Controllers\TeamController::class, 'store'])->name('team.store');
+    Route::delete('/team/staff/{staff}', [\App\Http\Controllers\TeamController::class, 'destroy'])->name('team.destroy');
+});
 
 // --- Event Routes ---
 // IMPORTANT: 'create' must come BEFORE '{event}' to avoid route conflict

@@ -170,6 +170,84 @@
                 </div>
             </div>
 
+            {{-- ── MY TEAM / STAFF ── --}}
+            <div class="mb-8 card overflow-hidden" x-data>
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 transition-colors">
+                    <div>
+                        <h3 class="font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            My Team & Staff
+                        </h3>
+                        <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">Manage access for ticket scanners</p>
+                    </div>
+                    <button @click="$dispatch('open-team-modal')" class="btn-vercel text-sm px-4 py-2 text-center whitespace-nowrap bg-[#111] dark:bg-white text-white dark:text-black border-none hover:opacity-80 transition-opacity">
+                        <span class="mr-1 font-bold">+</span> Invite Staff
+                    </button>
+                </div>
+
+                @if(Auth::user()->staff->isEmpty())
+                    <div class="p-8 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                        You haven't assigned any staff members yet. Invite someone to help you scan tickets at the door!
+                    </div>
+                @else
+                    <div class="divide-y divide-gray-50 dark:divide-white/5">
+                        @foreach(Auth::user()->staff as $staffMember)
+                            <div class="p-4 px-6 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+                                <div class="flex items-center gap-4 border border-transparent">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center font-bold text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 uppercase shadow-sm flex-shrink-0">
+                                        {{ mb_substr($staffMember->name, 0, 1) }}
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white leading-tight">{{ $staffMember->name }}</p>
+                                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{{ $staffMember->email }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <form action="{{ route('team.destroy', $staffMember->id) }}" method="POST" onsubmit="return confirm('Revoke scanning access for this staff member?')">
+                                        @csrf @method('DELETE')
+                                        <button class="text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 px-3 py-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors shadow-sm focus:outline-none">Revoke Access</button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            {{-- Global Invite Modal (Moved outside overflow-hidden scope) --}}
+            <div x-data="{ showTeamModal: false }" @open-team-modal.window="showTeamModal = true">
+                <div x-show="showTeamModal" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div x-show="showTeamModal" @click="showTeamModal = false" x-transition.opacity class="fixed inset-0 bg-gray-900/80 dark:bg-black/80 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div x-show="showTeamModal" x-transition class="relative inline-block align-bottom bg-white dark:bg-[#111] rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full border border-gray-200 dark:border-white/10 glass">
+                            <div class="px-6 py-6 border-b border-gray-100 dark:border-white/10">
+                                <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-tight" id="modal-title">Invite Staff Member</h3>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 font-medium">Add a co-organizer or staff member to your team. They will receive access exclusively to the QR Ticket Scanner, and will not see your financial dashboard.</p>
+                            </div>
+                            <form action="{{ route('team.store') }}" method="POST">
+                                @csrf
+                                <div class="px-6 py-5 space-y-4">
+                                    <p class="text-xs text-gray-500 mb-4 bg-gray-50 dark:bg-white/5 p-3 rounded border border-gray-100 dark:border-white/10">The staff member must already have an Event-Pass account. Enter the email address they registered with.</p>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">User Email Address</label>
+                                        <input type="email" name="email" required class="form-input-vercel w-full" placeholder="e.g. jane@example.com">
+                                    </div>
+                                </div>
+                                <div class="px-6 py-4 bg-gray-50 dark:bg-white/5 border-t border-gray-100 dark:border-white/10 flex flex-row-reverse gap-3">
+                                    <button type="submit" class="btn-vercel border-0 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md text-sm px-6 py-2 transition-colors">
+                                        Add to Team
+                                    </button>
+                                    <button type="button" @click="showTeamModal = false" class="btn-vercel-secondary text-sm px-6 py-2 transition-colors">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- ── MY EVENTS ── --}}
             <div class="card overflow-hidden" x-data="{ searchEvents: '' }">
                 <div class="px-6 py-4 border-b border-gray-100 dark:border-white/10 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 transition-colors">

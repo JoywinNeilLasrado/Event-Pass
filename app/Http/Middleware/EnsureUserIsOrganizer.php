@@ -16,6 +16,9 @@ class EnsureUserIsOrganizer
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user() || ! $request->user()->is_organizer) {
+            if ($request->user() && $request->user()->employer_id) {
+                return redirect()->route('scan');
+            }
             return redirect()->route('upgrade.index')->with('error', 'Ready to host? Upgrade your account to become an Organizer!');
         }
 

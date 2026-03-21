@@ -11,7 +11,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'bio', 'profile_picture', 'is_admin', 'is_organizer', 'has_unlimited_events', 'cashfree_vendor_id'];
+    protected $fillable = ['name', 'email', 'password', 'bio', 'profile_picture', 'is_admin', 'is_organizer', 'has_unlimited_events', 'cashfree_vendor_id', 'employer_id'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -40,5 +40,15 @@ class User extends Authenticatable
     public function waitlists(): HasMany
     {
         return $this->hasMany(Waitlist::class);
+    }
+
+    public function employer()
+    {
+        return $this->belongsTo(User::class, 'employer_id');
+    }
+
+    public function staff(): HasMany
+    {
+        return $this->hasMany(User::class, 'employer_id');
     }
 }
