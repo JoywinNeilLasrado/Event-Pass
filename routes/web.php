@@ -55,6 +55,7 @@ Route::middleware(['auth', 'event.owner'])->group(function () {
     Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     Route::get('/events/{event}/attendees', [EventController::class, 'attendees'])->name('events.attendees');
+    Route::post('/events/{event}/message-attendees', [EventController::class, 'messageAttendees'])->name('events.message_attendees');
     Route::get('/events/{event}/export', [EventController::class, 'exportAttendees'])->name('events.export');
     Route::get('/events/{event}/pay', [EventController::class, 'retryPublishPayment'])->name('events.retry_publish_payment');
     

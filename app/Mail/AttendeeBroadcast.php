@@ -2,24 +2,30 @@
 
 namespace App\Mail;
 
+use App\Models\Event;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class AttendeeBroadcast extends Mailable
+class AttendeeBroadcast extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+
+    public $event;
+    public $subjectLine;
+    public $broadcastMessage;
 
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(Event $event, $subjectLine, $broadcastMessage)
     {
-        //
+        $this->event = $event;
+        $this->subjectLine = $subjectLine;
+        $this->broadcastMessage = $broadcastMessage;
     }
 
     /**
@@ -28,7 +34,8 @@ class AttendeeBroadcast extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Attendee Broadcast',
+            replyTo: [$this->event->user->email],
+            subject: $this->subjectLine,
         );
     }
 
@@ -38,14 +45,14 @@ class AttendeeBroadcast extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'emails.attendee_broadcast',
         );
     }
 
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, Attachment>
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
     public function attachments(): array
     {

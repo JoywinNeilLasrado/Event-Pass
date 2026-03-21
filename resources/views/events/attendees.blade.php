@@ -19,7 +19,57 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 transition-colors">{{ $event->date->format('l, F j, Y') }} at {{ $event->time }} &bull; {{ $event->location }}</p>
                     </div>
                     @php $checkedInCount = $event->bookings->where('is_checked_in', true)->count(); @endphp
-                    <div class="flex gap-4 border-t sm:border-t-0 border-gray-100 dark:border-white/10 pt-4 sm:pt-0 mt-2 sm:mt-0 transition-colors">
+                    <div class="flex flex-wrap sm:flex-nowrap gap-4 border-t sm:border-t-0 border-gray-100 dark:border-white/10 pt-4 sm:pt-0 mt-2 sm:mt-0 transition-colors">
+                        
+                        @if($event->bookings->count() > 0)
+                        <div x-data="{ open: false }">
+                            <button @click="open = true" type="button" class="h-full flex flex-col items-center justify-center px-6 py-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-sm cursor-pointer group text-center outline-none">
+                                <svg class="w-6 h-6 mb-1 text-indigo-600 dark:text-indigo-400 opacity-80 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 opacity-90 group-hover:opacity-100">Broadcast</span>
+                            </button>
+
+                            <div x-show="open" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                    <div x-show="open" @click="open = false" x-transition.opacity class="fixed inset-0 bg-gray-900/75 dark:bg-black/80 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+                                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                                    
+                                    <div x-show="open" x-transition class="relative inline-block align-bottom bg-white dark:bg-neutral-900 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full border border-gray-100 dark:border-white/10">
+                                        <div class="px-6 py-6 border-b border-gray-100 dark:border-white/10">
+                                            <div class="flex items-center justify-between">
+                                                <h3 class="text-xl leading-6 font-black text-gray-900 dark:text-white tracking-tight" id="modal-title">Broadcast Message</h3>
+                                                <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                </button>
+                                            </div>
+                                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Send an email notification via the Event-Pass cloud to all <b>{{ $event->bookings->unique('user_id')->count() }}</b> verified ticket holders. When attendees reply, the message will route directly to your personal email inbox.</p>
+                                        </div>
+                                        <form action="{{ route('events.message_attendees', $event) }}" method="POST">
+                                            @csrf
+                                            <div class="px-6 py-5 space-y-4">
+                                                <div>
+                                                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Subject Label</label>
+                                                    <input type="text" name="subject" required class="form-input-vercel w-full" placeholder="e.g. Venue Change Alert! 📍">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Message Body</label>
+                                                    <textarea name="message" required rows="5" class="form-input-vercel w-full" placeholder="Type your broadcast message here..."></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="px-6 py-4 bg-gray-50 dark:bg-neutral-800/50 border-t border-gray-100 dark:border-white/10 flex flex-row-reverse gap-3">
+                                                <button type="submit" class="btn-vercel border-0 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md text-sm px-6 py-2 transition-colors">
+                                                    Send Broadcast
+                                                </button>
+                                                <button type="button" @click="open = false" class="btn-vercel-secondary text-sm px-6 py-2 transition-colors">
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         <div class="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-lg px-4 py-2 text-center transition-colors">
                             <span class="block text-2xl font-black text-gray-900 dark:text-white">{{ $event->bookings->count() }}</span>
                             <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Booked</span>

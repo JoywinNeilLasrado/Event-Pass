@@ -188,6 +188,30 @@ class EventController extends Controller
         return view('events.attendees', compact('event'));
     }
 
+    public function messageAttendees(Request $request, Event $event)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        $attendees = $event->bookings()->with('user')->get()->pluck('user')->unique('id');
+
+        if ($attendees->isEmpty()) {
+            return back()->with('error', 'There are no attendees to message yet.');
+        }
+
+        foreach ($attendees as $attendee) {
+            \Illuminate\Support\Facades\Mail::to($attendee->email)->send(new \App\Mail\AttendeeBroadcast(
+                $event,
+                $request->subject,
+                $request->message
+            ));
+        }
+
+        return back()->with('success', 'Blast Message dispatched unconditionally to all ' . $attendees->count() . ' verified unique attendees! 🚀');
+    }
+
     public function update(UpdateEventRequest $request, Event $event)
     {
         $data = $request->validated();
