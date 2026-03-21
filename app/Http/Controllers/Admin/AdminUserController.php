@@ -8,9 +8,36 @@ use Illuminate\Http\Request;
 
 class AdminUserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::withCount(['events', 'bookings'])->latest()->paginate(15);
+        $query = User::with('employer')->withCount(['events', 'bookings'])->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('role')) {
+            switch ($request->role) {
+                case 'admin':
+                    $query->where('is_admin', true);
+                    break;
+                case 'organizer':
+                    $query->where('is_organizer', true);
+                    break;
+                case 'staff':
+                    $query->whereNotNull('employer_id');
+                    break;
+                case 'user':
+                    $query->where('is_admin', false)->where('is_organizer', false)->whereNull('employer_id');
+                    break;
+            }
+        }
+
+        $users = $query->paginate(15)->withQueryString();
         return view('admin.users.index', compact('users'));
     }
 
