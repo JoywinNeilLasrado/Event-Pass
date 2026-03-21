@@ -23,7 +23,7 @@ class AdminDashboardController extends Controller
             'tags'           => Tag::count(),
         ];
 
-        $recentBookings = Booking::with(['user', 'event'])
+        $recentBookings = Booking::with(['user', 'event' => function($q) { $q->withTrashed(); }])
             ->latest()
             ->take(8)
             ->get();

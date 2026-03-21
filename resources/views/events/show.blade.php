@@ -211,25 +211,22 @@
                                                 </button>
                                             </form>
                                         </div>
-                                    @elseif($hasBooked ?? false)
-                                        <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-4 text-center transition-colors">
-                                            <p class="font-bold mb-1 flex items-center justify-center">
-                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                You're going!
-                                            </p>
-                                            <p class="text-xs">Your ticket is confirmed.</p>
-                                        </div>
-                                        <form action="{{ route('bookings.destroy', $event) }}" method="POST"
-                                              onsubmit="return confirm('Cancel your ticket? The seat will be returned.')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="w-full text-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 mt-2 transition-colors focus:outline-none">
-                                                Cancel reservation
-                                            </button>
-                                        </form>
-                                    @elseif($event->remaining > 0)
-                                        <div class="space-y-4 mt-2" x-data="promoCheckout()">
-                                            <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-3 tracking-tight">Select Ticket Package</h4>
+                                    @else
+                                        @if($hasBooked ?? false)
+                                            <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-4 text-center transition-colors mb-4">
+                                                <p class="font-bold mb-1 flex items-center justify-center">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                    You're going!
+                                                </p>
+                                                <div class="flex flex-col items-center justify-center gap-1 mt-2">
+                                                    <a href="{{ route('bookings.index') }}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">View/Manage my tickets &rarr;</a>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if($event->remaining > 0)
+                                            <div class="space-y-4 mt-2" x-data="promoCheckout()">
+                                                <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-3 tracking-tight">Select Ticket Package</h4>
                                             
                                             <!-- Promo Code Input -->
                                             <div class="mb-1 flex items-center justify-between bg-white/40 dark:bg-black/40 backdrop-blur-md border border-gray-200 dark:border-white/10 p-2 pl-4 rounded-lg shadow-sm">
@@ -265,45 +262,62 @@
                                                         </div>
                                                     </div>
                                                     
-                                                    <div class="mt-5 flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-4">
+                                                    <div class="mt-5 border-t border-gray-100 dark:border-white/5 pt-4">
                                                         @if($tier->remaining > 0)
-                                                            <span class="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest bg-green-50 dark:bg-green-900/30 px-2.5 py-1 rounded-md shadow-sm">
-                                                                {{ $tier->remaining }} Tickets Left
-                                                            </span>
-                                                            <form action="{{ route('bookings.store', $event) }}" method="POST">
+                                                            <div class="mb-4">
+                                                                <span class="inline-block text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded-md shadow-sm whitespace-nowrap">
+                                                                    {{ $tier->remaining }} Tickets Left
+                                                                </span>
+                                                            </div>
+                                                            <form action="{{ route('bookings.store', $event) }}" method="POST" class="flex flex-row items-center gap-3 w-full">
                                                                 @csrf
                                                                 <input type="hidden" name="ticket_type_id" value="{{ $tier->id }}">
                                                                 <input type="hidden" name="promo_code" :value="isValid ? code : ''">
-                                                                <button type="submit" class="btn-vercel text-sm px-6 py-2 shadow-md hover:-translate-y-0.5 transition-transform">Select</button>
+                                                                
+                                                                <div class="relative flex-1">
+                                                                    <select name="quantity" class="w-full shadow-sm appearance-none border border-gray-200 dark:border-white/10 dark:bg-black/40 rounded-lg py-2.5 pl-4 pr-8 text-sm text-gray-900 dark:text-white font-medium focus:ring-indigo-500 transition-colors cursor-pointer">
+                                                                        @for($i = 1; $i <= min(10, $tier->remaining); $i++)
+                                                                            <option value="{{ $i }}">{{ $i }}</option>
+                                                                        @endfor
+                                                                    </select>
+                                                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <button type="submit" class="flex-1 btn-vercel text-sm px-6 py-2.5 shadow-md hover:-translate-y-0.5 transition-transform shrink-0">Select</button>
                                                             </form>
                                                         @else
                                                             @php
                                                                 $isOnWaitlist = in_array($tier->id, $userWaitlistTiers ?? []);
                                                             @endphp
-                                                            @if($isOnWaitlist)
-                                                                <span class="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1 rounded-md shadow-sm">
-                                                                    On Waitlist
-                                                                </span>
-                                                                <button disabled type="button" class="btn-vercel-secondary text-sm px-6 py-2 opacity-50 cursor-not-allowed">Pending</button>
-                                                            @else
-                                                                <span class="text-[10px] font-bold text-red-500 dark:text-red-400 uppercase tracking-widest bg-red-50 dark:bg-red-900/30 px-2.5 py-1 rounded-md shadow-sm">
-                                                                    Sold Out
-                                                                </span>
-                                                                <form action="{{ route('waitlists.store', $event) }}" method="POST">
-                                                                    @csrf
-                                                                    <input type="hidden" name="ticket_type_id" value="{{ $tier->id }}">
-                                                                    <button type="submit" class="inline-flex items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 text-gray-900 dark:text-white px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm focus:outline-none">Join Waitlist</button>
-                                                                </form>
-                                                            @endif
+                                                            <div class="flex items-center justify-between w-full">
+                                                                @if($isOnWaitlist)
+                                                                    <span class="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1 rounded-md shadow-sm">
+                                                                        On Waitlist
+                                                                    </span>
+                                                                    <button disabled type="button" class="btn-vercel-secondary text-sm px-6 py-2 opacity-50 cursor-not-allowed">Pending</button>
+                                                                @else
+                                                                    <span class="text-[10px] font-bold text-red-500 dark:text-red-400 uppercase tracking-widest bg-red-50 dark:bg-red-900/30 px-2.5 py-1 rounded-md shadow-sm">
+                                                                        Sold Out
+                                                                    </span>
+                                                                    <form action="{{ route('waitlists.store', $event) }}" method="POST">
+                                                                        @csrf
+                                                                        <input type="hidden" name="ticket_type_id" value="{{ $tier->id }}">
+                                                                        <button type="submit" class="inline-flex items-center justify-center bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 text-gray-900 dark:text-white px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm focus:outline-none">Join Waitlist</button>
+                                                                    </form>
+                                                                @endif
+                                                            </div>
                                                         @endif
                                                     </div>
                                                 </div>
                                             @endforeach
-                                        </div>>
+                                        </div>
                                     @else
                                         <div class="bg-white/40 dark:bg-white/5 backdrop-blur-md border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 rounded-lg p-4 text-center font-semibold transition-colors">
                                             Sold Out
                                         </div>
+                                    @endif
                                     @endif
                                 @else
                                     <div class="card border-gray-100 dark:border-white/10 p-6 text-center shadow-none mb-0 transition-colors">

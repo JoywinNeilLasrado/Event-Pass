@@ -47,12 +47,14 @@ class PaymentController extends Controller
             return redirect()->route('dashboard')->with('success', 'Your event has been published successfully! 🎉');
         } else {
             // Ticket Booking
-            $booking = Booking::where('cashfree_order_id', $order_id)->firstOrFail();
-            if ($booking->payment_status !== 'paid') {
-                $booking->update(['payment_status' => 'paid']);
-                Mail::to($booking->user->email)->send(new TicketBooked($booking));
+            $bookings = Booking::where('cashfree_order_id', $order_id)->get();
+            if ($bookings->isNotEmpty() && $bookings->first()->payment_status !== 'paid') {
+                Booking::where('cashfree_order_id', $order_id)->update(['payment_status' => 'paid']);
+                foreach ($bookings as $booking) {
+                    Mail::to($booking->user->email)->send(new TicketBooked($booking));
+                }
             }
-            return redirect()->route('bookings.index')->with('success', 'Payment successful! Your ticket has been booked! 🎉');
+            return redirect()->route('bookings.index')->with('success', 'Payment successful! Your tickets have been booked! 🎉');
         }
     }
 
@@ -95,10 +97,12 @@ class PaymentController extends Controller
                 $eventId = $parts[1];
                 \App\Models\Event::where('id', $eventId)->update(['is_published' => true, 'payment_status' => 'paid']);
             } else {
-                $booking = Booking::where('cashfree_order_id', $order_id)->first();
-                if ($booking && $booking->payment_status !== 'paid') {
-                    $booking->update(['payment_status' => 'paid']);
-                    Mail::to($booking->user->email)->send(new TicketBooked($booking));
+                $bookings = Booking::where('cashfree_order_id', $order_id)->get();
+                if ($bookings->isNotEmpty() && $bookings->first()->payment_status !== 'paid') {
+                    Booking::where('cashfree_order_id', $order_id)->update(['payment_status' => 'paid']);
+                    foreach ($bookings as $booking) {
+                        Mail::to($booking->user->email)->send(new TicketBooked($booking));
+                    }
                 }
             }
         }

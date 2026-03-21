@@ -29,13 +29,11 @@ class BookingController extends Controller
     {
         $request->validate([
             'ticket_type_id' => 'required|exists:ticket_types,id',
-            'promo_code' => 'nullable|string'
+            'promo_code' => 'nullable|string',
+            'quantity' => 'nullable|integer|min:1|max:10'
         ]);
 
-        $alreadyBooked = $event->bookings()->where('user_id', auth()->id())->exists();
-        if ($alreadyBooked) {
-            return back()->with('error', 'You have already booked a ticket for this event.');
-        }
+        $quantity = (int) ($request->quantity ?? 1);
 
         $ticketType = $event->ticketTypes()->findOrFail($request->ticket_type_id);
         
@@ -54,7 +52,7 @@ class BookingController extends Controller
                 return back()->with('error', 'This promo code has expired.');
             }
 
-            if ($promoCode->max_uses && $promoCode->uses >= $promoCode->max_uses) {
+            if ($promoCode->max_uses && ($promoCode->uses + $quantity) > $promoCode->max_uses) {
                 return back()->with('error', 'This promo code usage limit has been reached.');
             }
 
@@ -67,31 +65,33 @@ class BookingController extends Controller
             $finalPrice = max(0, $finalPrice);
         }
 
-        $booking = null;
+        $bookings = collect();
 
-        $updated = DB::transaction(function () use ($event, $ticketType, $promoCode, $finalPrice, &$booking) {
+        $updated = DB::transaction(function () use ($event, $ticketType, $promoCode, $finalPrice, $quantity, &$bookings) {
             $event = Event::lockForUpdate()->find($event->id);
             $ticketType = \App\Models\TicketType::lockForUpdate()->find($ticketType->id);
 
-            if ($event->remaining <= 0 || $ticketType->remaining <= 0) {
+            if ($event->remaining < $quantity || $ticketType->remaining < $quantity) {
                 return false;
             }
 
             if ($promoCode) {
                 $promoCode = \App\Models\PromoCode::lockForUpdate()->find($promoCode->id);
-                if ($promoCode->max_uses && $promoCode->uses >= $promoCode->max_uses) {
+                if ($promoCode->max_uses && ($promoCode->uses + $quantity) > $promoCode->max_uses) {
                     return false;
                 }
-                $promoCode->increment('uses');
+                $promoCode->increment('uses', $quantity);
             }
 
-            $booking = $event->bookings()->create([
-                'user_id' => auth()->id(),
-                'ticket_type_id' => $ticketType->id,
-                'promo_code_id' => $promoCode ? $promoCode->id : null,
-                'amount_paid' => $finalPrice,
-                'payment_status' => $finalPrice > 0 ? 'pending' : 'free',
-            ]);
+            for($i = 0; $i < $quantity; $i++) {
+                $bookings->push($event->bookings()->create([
+                    'user_id' => auth()->id(),
+                    'ticket_type_id' => $ticketType->id,
+                    'promo_code_id' => $promoCode ? $promoCode->id : null,
+                    'amount_paid' => $finalPrice,
+                    'payment_status' => $finalPrice > 0 ? 'pending' : 'free',
+                ]));
+            }
 
             return true;
         });
@@ -100,20 +100,22 @@ class BookingController extends Controller
             return back()->with('error', 'Sorry, tickets or promo code are no longer available for this event.');
         }
 
-        if ($finalPrice > 0) {
+        $totalAmount = round($finalPrice * $quantity, 2);
+
+        if ($totalAmount > 0) {
             $appId = config('services.cashfree.app_id');
             $secretKey = config('services.cashfree.secret_key');
             $env = config('services.cashfree.env', 'sandbox');
             $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
 
-            $cashfreeOrderId = 'ORDER_' . $booking->id . '_' . time();
+            $cashfreeOrderId = 'ORDER_' . $bookings->first()->id . '_' . time();
 
             // Set up Easy Split if the organizer has linked a Cashfree Vendor Account
             $vendorSplits = [];
             if ($event->user->cashfree_vendor_id) {
                 $feePercent = \App\Models\Setting::getVal('ticket_fee_percent', 10);
-                $platformCut = round($finalPrice * ($feePercent / 100), 2);
-                $vendorAmount = round($finalPrice - $platformCut, 2);
+                $platformCut = round($totalAmount * ($feePercent / 100), 2);
+                $vendorAmount = round($totalAmount - $platformCut, 2);
 
                 if ($vendorAmount > 0) {
                     $vendorSplits[] = [
@@ -124,14 +126,14 @@ class BookingController extends Controller
             }
 
             $orderPayload = [
-                'order_amount' => round($finalPrice, 2),
+                'order_amount' => round($totalAmount, 2),
                 'order_currency' => 'INR',
                 'order_id' => $cashfreeOrderId,
                 'customer_details' => [
                     'customer_id' => (string) auth()->id(),
                     'customer_name' => auth()->user()->name,
                     'customer_email' => auth()->user()->email,
-                    'customer_phone' => '9999999999', // Cashfree mandatory default fallback
+                    'customer_phone' => '9999999999',
                 ],
                 'order_meta' => [
                     'return_url' => route('payment.success') . '?order_id={order_id}',
@@ -140,7 +142,7 @@ class BookingController extends Controller
             ];
 
             if (!empty($vendorSplits)) {
-                $orderPayload['vendor_splits'] = $vendorSplits;
+                $orderPayload['order_splits'] = $vendorSplits;
             }
 
             $response = \Illuminate\Support\Facades\Http::withHeaders([
@@ -153,8 +155,10 @@ class BookingController extends Controller
 
             if ($response->successful()) {
                 $paymentSessionId = $response->json('payment_session_id');
-                // Store order ID mapped directly to our database cache
-                $booking->update(['cashfree_order_id' => $cashfreeOrderId]);
+                // Store order ID mapped directly to our database cache for ALL generated bookings
+                foreach ($bookings as $booking) {
+                    $booking->update(['cashfree_order_id' => $cashfreeOrderId]);
+                }
                 
                 return view('bookings.cashfree_checkout', [
                     'paymentSessionId' => $paymentSessionId,
@@ -165,15 +169,15 @@ class BookingController extends Controller
             return back()->with('error', 'Payment gateway error: ' . $response->json('message', 'Unknown error'));
         }
 
-        if ($booking) {
+        foreach ($bookings as $booking) {
             Mail::to(auth()->user()->email)->send(new TicketBooked($booking));
         }
 
         if ($promoCode) {
-            return back()->with('success', 'Promo code applied! Ticket booked for $0.00. 🎉');
+            return back()->with('success', "Promo code applied! $quantity Ticket(s) booked. 🎉");
         }
 
-        return back()->with('success', 'Ticket booked successfully! Enjoy the event! 🎉');
+        return back()->with('success', "$quantity Ticket(s) booked successfully! Enjoy the event! 🎉");
     }
 
     public function destroy(Request $request, Event $event)
