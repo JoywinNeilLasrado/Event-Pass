@@ -47,7 +47,19 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/kyc/{user}/approve', [\App\Http\Controllers\Admin\AdminKycController::class, 'approve'])->name('kyc.approve');
     Route::post('/kyc/{user}/reject', [\App\Http\Controllers\Admin\AdminKycController::class, 'reject'])->name('kyc.reject');
 
+    // Financials
+    Route::get('/financials', [\App\Http\Controllers\Admin\AdminFinancialsController::class, 'index'])->name('financials.index');
+
     // Settings
     Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+
+    // Audit Logs
+    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AdminAuditLogController::class, 'index'])->name('audit-logs.index');
+
+    // System Health & Queues
+    Route::get('/system', [\App\Http\Controllers\Admin\AdminSystemHealthController::class, 'index'])->name('system.index');
+    Route::post('/system/retry/{id}', [\App\Http\Controllers\Admin\AdminSystemHealthController::class, 'retry'])->name('system.retry');
+    Route::post('/system/delete/{id}', [\App\Http\Controllers\Admin\AdminSystemHealthController::class, 'deleteFailed'])->name('system.delete');
+    Route::post('/system/flush', [\App\Http\Controllers\Admin\AdminSystemHealthController::class, 'flushFailed'])->name('system.flush');
 });

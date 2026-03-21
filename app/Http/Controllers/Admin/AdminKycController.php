@@ -24,6 +24,14 @@ class AdminKycController extends Controller
             'kyc_status' => 'approved'
         ]);
 
+        \App\Models\AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'approved_kyc',
+            'model_type' => get_class($user),
+            'model_id' => $user->id,
+            'details' => ['target_name' => $user->name, 'target_email' => $user->email]
+        ]);
+
         return back()->with('success', 'Organizer firm approved successfully. They now have publishing rights.');
     }
 
@@ -32,6 +40,14 @@ class AdminKycController extends Controller
         $user->update([
             'is_organizer' => false,
             'kyc_status' => 'rejected'
+        ]);
+
+        \App\Models\AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'rejected_kyc',
+            'model_type' => get_class($user),
+            'model_id' => $user->id,
+            'details' => ['target_name' => $user->name, 'target_email' => $user->email]
         ]);
 
         return back()->with('success', 'The organizer application has been securely rejected.');

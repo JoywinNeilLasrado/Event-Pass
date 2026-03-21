@@ -47,8 +47,18 @@ class AdminUserController extends Controller
             return back()->with('error', 'You cannot change your own admin status.');
         }
         $user->update(['is_admin' => !$user->is_admin]);
-        $status = $user->is_admin ? 'granted admin' : 'revoked admin from';
-        return back()->with('success', "Successfully {$status} {$user->name}.");
+        $status = $user->is_admin ? 'granted_admin' : 'revoked_admin';
+
+        \App\Models\AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => $status,
+            'model_type' => get_class($user),
+            'model_id' => $user->id,
+            'details' => ['target_name' => $user->name, 'target_email' => $user->email]
+        ]);
+
+        $statusMsg = $user->is_admin ? 'granted admin' : 'revoked admin from';
+        return back()->with('success', "Successfully {$statusMsg} {$user->name}.");
     }
 
     public function destroy(User $user)
@@ -56,6 +66,15 @@ class AdminUserController extends Controller
         if ($user->id === auth()->id()) {
             return back()->with('error', 'You cannot delete yourself.');
         }
+
+        \App\Models\AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'deleted_user',
+            'model_type' => get_class($user),
+            'model_id' => $user->id,
+            'details' => ['target_name' => $user->name, 'target_email' => $user->email]
+        ]);
+
         $user->delete();
         return back()->with('success', "User {$user->name} has been deleted.");
     }

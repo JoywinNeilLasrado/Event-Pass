@@ -55,18 +55,44 @@ class AdminEventController extends Controller
     {
         $event = Event::onlyTrashed()->findOrFail($id);
         $event->restore();
+
+        \App\Models\AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'restored_event',
+            'model_type' => get_class($event),
+            'model_id' => $event->id,
+            'details' => ['event_title' => $event->title]
+        ]);
+
         return back()->with('success', "Event \"{$event->title}\" has been restored.");
     }
 
     public function forceDestroy($id)
     {
         $event = Event::withTrashed()->findOrFail($id);
+        
+        \App\Models\AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'force_deleted_event',
+            'model_type' => get_class($event),
+            'model_id' => $event->id,
+            'details' => ['event_title' => $event->title]
+        ]);
+
         $event->forceDelete();
         return back()->with('success', 'Event permanently deleted.');
     }
 
     public function destroy(Event $event)
     {
+        \App\Models\AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'soft_deleted_event',
+            'model_type' => get_class($event),
+            'model_id' => $event->id,
+            'details' => ['event_title' => $event->title]
+        ]);
+
         $event->delete();
         return back()->with('success', "Event \"{$event->title}\" soft-deleted.");
     }

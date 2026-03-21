@@ -27,6 +27,9 @@ class Event extends Model
         'is_published',
         'payment_status',
         'cashfree_order_id',
+        'payout_status',
+        'payout_amount',
+        'payout_reference_id',
     ];
 
     protected $casts = [

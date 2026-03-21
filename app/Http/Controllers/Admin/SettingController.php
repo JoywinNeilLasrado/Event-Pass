@@ -25,6 +25,14 @@ class SettingController extends Controller
             Setting::where('key', $key)->update(['value' => $value]);
         }
 
+        \App\Models\AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'updated_global_settings',
+            'model_type' => Setting::class,
+            'model_id' => null,
+            'details' => ['updated_keys' => $request->settings]
+        ]);
+
         return back()->with('success', 'Platform fees updated successfully.');
     }
 }
