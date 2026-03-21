@@ -35,11 +35,20 @@ class PaymentController extends Controller
         if (str_starts_with($order_id, 'UPGRADE_')) {
             $parts = explode('_', $order_id);
             $userId = $parts[1];
-            \App\Models\User::where('id', $userId)->update([
-                'is_organizer' => true,
-                'has_unlimited_events' => true
-            ]);
-            return redirect()->route('dashboard')->with('success', 'Your account has been upgraded! You are now a Pro Organizer. 🎉');
+            $user = \App\Models\User::find($userId);
+            if ($user && $user->kyc_status === 'approved') {
+                $user->update([
+                    'is_organizer' => true,
+                    'has_unlimited_events' => true
+                ]);
+                return redirect()->route('dashboard')->with('success', 'Welcome back! Your Pro Organizer account has been reactivated.');
+            } else if ($user) {
+                $user->update([
+                    'kyc_status' => 'pending_submission',
+                    'has_unlimited_events' => true
+                ]);
+                return redirect()->route('kyc.setup')->with('success', 'Pro payment successful! Please complete your organizer verification to activate your account.');
+            }
         } elseif (str_starts_with($order_id, 'EVENT_')) {
             $parts = explode('_', $order_id);
             $eventId = $parts[1];
@@ -88,10 +97,18 @@ class PaymentController extends Controller
             if (str_starts_with($order_id, 'UPGRADE_')) {
                 $parts = explode('_', $order_id);
                 $userId = $parts[1];
-                \App\Models\User::where('id', $userId)->update([
-                    'is_organizer' => true,
-                    'has_unlimited_events' => true
-                ]);
+                $user = \App\Models\User::find($userId);
+                if ($user && $user->kyc_status === 'approved') {
+                    $user->update([
+                        'is_organizer' => true,
+                        'has_unlimited_events' => true
+                    ]);
+                } else if ($user) {
+                    $user->update([
+                        'kyc_status' => 'pending_submission',
+                        'has_unlimited_events' => true
+                    ]);
+                }
             } elseif (str_starts_with($order_id, 'EVENT_')) {
                 $parts = explode('_', $order_id);
                 $eventId = $parts[1];

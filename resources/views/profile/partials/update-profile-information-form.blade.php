@@ -99,28 +99,30 @@
                 </p>
             </div>
             
-            <div class="flex items-center gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 mt-3 sm:mt-0">
                 @if (!$user->is_organizer)
-                    <a href="{{ route('upgrade.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-xs font-bold rounded-lg text-indigo-700 bg-indigo-100 hover:bg-indigo-200 dark:text-indigo-300 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <a href="{{ route('upgrade.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-xs font-bold rounded-lg text-indigo-700 bg-indigo-100 hover:bg-indigo-200 dark:text-indigo-300 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap">
                         Upgrade Now
                     </a>
                 @else
-                    @if ($user->has_unlimited_events)
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 shadow-sm border border-green-200/50 dark:border-green-800/50">
-                            <svg class="mr-1.5 h-3 w-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
-                            Pro Active
-                        </span>
-                    @else
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-800/50">
-                            <svg class="mr-1.5 h-3 w-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
-                            Basic Active
-                        </span>
-                        <a href="{{ route('upgrade.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors underline decoration-2 underline-offset-4">
-                            Go Pro
-                        </a>
-                    @endif
+                    <div class="flex items-center gap-3">
+                        @if ($user->has_unlimited_events)
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 shadow-sm border border-green-200/50 dark:border-green-800/50 whitespace-nowrap">
+                                <svg class="mr-1.5 h-3 w-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                                Pro Active
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-800/50 whitespace-nowrap">
+                                <svg class="mr-1.5 h-3 w-3" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                                Basic Active
+                            </span>
+                            <a href="{{ route('upgrade.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors underline decoration-2 underline-offset-4 whitespace-nowrap">
+                                Go Pro
+                            </a>
+                        @endif
+                    </div>
                     
-                    <label class="flex items-center gap-2 cursor-pointer ml-2 group">
+                    <label class="flex items-center gap-2 cursor-pointer group whitespace-nowrap sm:border-l sm:border-gray-200 dark:sm:border-gray-700 sm:pl-5">
                         <input type="checkbox" name="cancel_organizer" value="1" class="w-4 h-4 rounded border-red-300 dark:border-red-500/30 text-red-600 focus:ring-red-500/50 dark:bg-black/50 transition-colors">
                         <span class="text-xs font-bold text-red-600 group-hover:text-red-800 dark:text-red-400 dark:group-hover:text-red-300 transition-colors">Cancel Plan on Save</span>
                     </label>

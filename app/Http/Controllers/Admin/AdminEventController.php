@@ -25,6 +25,10 @@ class AdminEventController extends Controller
             });
         }
 
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
         if ($request->filled('status')) {
             switch ($request->status) {
                 case 'active':
@@ -43,7 +47,8 @@ class AdminEventController extends Controller
         }
 
         $events = $query->paginate(15)->withQueryString();
-        return view('admin.events.index', compact('events'));
+        $categories = \App\Models\Category::orderBy('name')->get();
+        return view('admin.events.index', compact('events', 'categories'));
     }
 
     public function restore($id)

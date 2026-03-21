@@ -122,4 +122,10 @@ Route::get('/preview-reminder', function () {
     return new App\Mail\EventReminder($event, $booking);
 });
 
+// --- KYC Verification Flow ---
+Route::middleware(['auth'])->group(function () {
+    Route::get('/kyc/setup', [\App\Http\Controllers\KycController::class, 'setup'])->name('kyc.setup');
+    Route::post('/kyc/submit', [\App\Http\Controllers\KycController::class, 'submit'])->name('kyc.submit');
+});
+
 require __DIR__.'/auth.php';

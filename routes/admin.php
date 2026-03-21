@@ -39,6 +39,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
     Route::delete('/bookings/{booking}', [AdminBookingController::class, 'destroy'])->name('bookings.destroy');
 
+    // KYC Approvals
+    Route::get('/kyc', [\App\Http\Controllers\Admin\AdminKycController::class, 'index'])->name('kyc.index');
+    Route::post('/kyc/{user}/approve', [\App\Http\Controllers\Admin\AdminKycController::class, 'approve'])->name('kyc.approve');
+    Route::post('/kyc/{user}/reject', [\App\Http\Controllers\Admin\AdminKycController::class, 'reject'])->name('kyc.reject');
+
     // Settings
     Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');

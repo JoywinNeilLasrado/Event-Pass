@@ -17,12 +17,23 @@ class UpgradeController extends Controller
     public function checkoutBasic(Request $request)
     {
         $user = auth()->user();
+
+        // If they already passed KYC in the past but downgraded, restore them instantly
+        if ($user->kyc_status === 'approved') {
+            $user->update([
+                'is_organizer' => true,
+                'has_unlimited_events' => false
+            ]);
+            return redirect()->route('dashboard')->with('success', 'Welcome back! Your organizer account has been reactivated.');
+        }
+
         $user->update([
-            'is_organizer' => true, 
+            'is_organizer' => false, 
+            'kyc_status' => 'pending_submission',
             'has_unlimited_events' => false
         ]);
         
-        return redirect()->route('dashboard')->with('success', 'Welcome to your Organizer Dashboard! You are on the Pay-As-You-Go plan. 🎉');
+        return redirect()->route('kyc.setup')->with('success', 'Plan selected! Please complete your organizer verification to gain Dashboard access.');
     }
 
     public function checkoutPro(Request $request)

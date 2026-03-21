@@ -2,10 +2,15 @@
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-            <div class="flex items-center gap-8">
+            <div class="flex items-center gap-6 sm:gap-8">
+                <!-- Back to Welcome Page -->
+                <a href="{{ url('/') }}" class="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors" title="Back to Home">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                </a>
+
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('events.index') }}" class="text-black dark:text-white transition-colors duration-300 font-extrabold text-xl tracking-tighter">
+                    <a href="{{ url('/') }}" class="text-black dark:text-white transition-colors duration-300 font-extrabold text-xl tracking-tighter">
                         Passage.
                     </a>
                 </div>
