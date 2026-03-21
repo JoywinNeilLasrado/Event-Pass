@@ -110,21 +110,6 @@ class BookingController extends Controller
 
             $cashfreeOrderId = 'ORDER_' . $bookings->first()->id . '_' . time();
 
-            // Set up Easy Split if the organizer has linked a Cashfree Vendor Account
-            $vendorSplits = [];
-            if ($event->user->cashfree_vendor_id) {
-                $feePercent = \App\Models\Setting::getVal('ticket_fee_percent', 10);
-                $platformCut = round($totalAmount * ($feePercent / 100), 2);
-                $vendorAmount = round($totalAmount - $platformCut, 2);
-
-                if ($vendorAmount > 0) {
-                    $vendorSplits[] = [
-                        'vendor_id' => $event->user->cashfree_vendor_id,
-                        'amount' => $vendorAmount
-                    ];
-                }
-            }
-
             $orderPayload = [
                 'order_amount' => round($totalAmount, 2),
                 'order_currency' => 'INR',
@@ -140,10 +125,6 @@ class BookingController extends Controller
                     'notify_url' => route('cashfree.webhook'),
                 ]
             ];
-
-            if (!empty($vendorSplits)) {
-                $orderPayload['order_splits'] = $vendorSplits;
-            }
 
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'x-client-id' => $appId,

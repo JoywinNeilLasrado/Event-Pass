@@ -249,10 +249,41 @@ class EventController extends Controller
 
     public function destroy(Event $event)
     {
+        // Issue refunds to all attendees before soft deleting
+        $bookings = $event->bookings()->where('payment_status', 'paid')->whereNotNull('cashfree_order_id')->get();
+        
+        if ($bookings->isNotEmpty()) {
+            $appId = config('services.cashfree.app_id');
+            $secretKey = config('services.cashfree.secret_key');
+            $env = config('services.cashfree.env', 'sandbox');
+            $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
+
+            foreach ($bookings as $booking) {
+                if ($booking->amount_paid > 0) {
+                    try {
+                        \Illuminate\Support\Facades\Http::withHeaders([
+                            'x-client-id' => $appId,
+                            'x-client-secret' => $secretKey,
+                            'x-api-version' => '2023-08-01',
+                            'Accept' => 'application/json',
+                            'Content-Type' => 'application/json',
+                        ])->post($baseUrl . '/orders/' . $booking->cashfree_order_id . '/refunds', [
+                            'refund_amount' => round($booking->amount_paid, 2),
+                            'refund_id' => 'REF_EVT_' . $booking->id . '_' . time(),
+                        ]);
+                        
+                        $booking->update(['payment_status' => 'refunded']);
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Failed to refund booking '.$booking->id.': '.$e->getMessage());
+                    }
+                }
+            }
+        }
+
         $event->delete(); // SoftDelete
 
         return redirect()->route('events.index')
-            ->with('success', 'Event deleted (soft).');
+            ->with('success', 'Event definitively canceled! All original tickets have been fully refunded via Cashfree.');
     }
 
     public function exportAttendees(Event $event)

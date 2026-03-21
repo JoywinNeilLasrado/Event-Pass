@@ -11,6 +11,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+Schedule::command('payouts:process')->dailyAt('00:00');
+
 Artisan::command('app:send-reminders', function () {
     $this->info('Scanning database for upcoming events...');
     $tomorrow = now()->addDay()->toDateString();
