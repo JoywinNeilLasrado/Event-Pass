@@ -7,13 +7,19 @@
         <div>
             <div class="card p-6 sm:p-8 transition-colors">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white tracking-tight mb-6 transition-colors">Add Category</h3>
-                <form action="{{ route('admin.categories.store') }}" method="POST" class="space-y-4">
+                <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                     @csrf
                     <div>
                         <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Category Name <span class="text-red-500 dark:text-red-400">*</span></label>
                         <input type="text" name="name" placeholder="e.g. Technology" required
                             class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors placeholder-gray-400 dark:placeholder-gray-600">
                         @error('name') <p class="text-red-500 text-xs mt-1.5 font-medium">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Category Image</label>
+                        <input type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif"
+                            class="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#1A1A1A] px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white focus:bg-white dark:focus:bg-[#222] transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:bg-gray-200 dark:file:bg-[#333] file:text-gray-700 dark:file:text-white">
+                        @error('image') <p class="text-red-500 text-xs mt-1.5 font-medium">{{ $message }}</p> @enderror
                     </div>
                     <button class="btn-vercel w-full py-3 text-sm mt-3">
                         Create Category
@@ -43,15 +49,27 @@
                     <tbody class="divide-y divide-gray-50 dark:divide-white/5 transition-colors">
                         @foreach($categories as $cat)
                             <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
-                                <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white transition-colors">{{ $cat->name }}</td>
+                                <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        @if($cat->image_path)
+                                            <img src="{{ \Illuminate\Support\Facades\Storage::url($cat->image_path) }}" alt="{{ $cat->name }}" class="w-8 h-8 rounded-full border border-gray-200 dark:border-white/10 object-cover shadow-sm">
+                                        @else
+                                            <div class="w-8 h-8 rounded-full border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-[#222] flex items-center justify-center text-[10px] text-gray-400">N/A</div>
+                                        @endif
+                                        {{ $cat->name }}
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 text-gray-400 dark:text-gray-500 font-mono text-xs transition-colors">{{ $cat->slug }}</td>
                                 <td class="px-6 py-4 text-center text-gray-600 dark:text-gray-400 font-medium transition-colors">{{ $cat->events_count }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <form action="{{ route('admin.categories.destroy', $cat) }}" method="POST"
-                                          onsubmit="return confirm('Delete category {{ $cat->name }}?')">
-                                        @csrf @method('DELETE')
-                                        <button class="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors focus:outline-none">Delete</button>
-                                    </form>
+                                    <div class="flex items-center justify-end gap-3">
+                                        <a href="{{ route('admin.categories.edit', $cat) }}" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">Edit</a>
+                                        <form action="{{ route('admin.categories.destroy', $cat) }}" method="POST"
+                                              onsubmit="return confirm('Delete category {{ $cat->name }}?')">
+                                            @csrf @method('DELETE')
+                                            <button class="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors focus:outline-none">Delete</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

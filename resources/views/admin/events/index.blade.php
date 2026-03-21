@@ -16,12 +16,41 @@
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search titles or organizers..." class="form-input-vercel w-full pl-9 h-8 text-xs py-1 rounded border border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white focus:ring-1 focus:ring-black dark:focus:ring-white">
                     </div>
                     
-                    <select name="category" onchange="this.form.submit()" class="form-input-vercel w-full sm:w-40 h-8 text-xs py-1 pl-3 pr-8 rounded border border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white focus:ring-1 focus:ring-black dark:focus:ring-white cursor-pointer transition-colors">
-                        <option value="">All Categories</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="relative w-full sm:w-40" x-data="{ open: false }">
+                        <input type="hidden" name="category" value="{{ request('category') }}" id="admin-category-filter">
+                        <button type="button" @click="open = !open" @click.outside="open = false" class="form-input-vercel w-full h-8 flex items-center justify-between text-xs py-1 pl-3 pr-2 text-left rounded border border-gray-200 dark:border-white/10 bg-transparent text-gray-900 dark:text-white focus:ring-1 focus:ring-black dark:focus:ring-white cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-white/5">
+                            <span class="truncate">
+                                @php
+                                    $selectedCategory = collect($categories)->firstWhere('id', request('category'));
+                                @endphp
+                                {{ $selectedCategory ? $selectedCategory->name : 'All Categories' }}
+                            </span>
+                            <svg class="w-3.5 h-3.5 ml-1 flex-shrink-0 transition-transform duration-200 text-gray-500" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        
+                        <div x-show="open" 
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             class="absolute z-[100] left-0 right-0 mt-1 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-white/10 rounded-lg shadow-xl overflow-hidden py-1 max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:rounded-full"
+                             style="display: none;">
+                            <button type="button" 
+                                    @click="document.getElementById('admin-category-filter').value = ''; document.getElementById('admin-category-filter').form.submit()"
+                                    class="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/5 transition-colors {{ request('category') == '' ? 'text-black dark:text-white bg-gray-50 dark:bg-white/5' : 'text-gray-500 dark:text-gray-400' }}">
+                                All Categories
+                            </button>
+                            @foreach($categories as $category)
+                                <button type="button" 
+                                        @click="document.getElementById('admin-category-filter').value = '{{ $category->id }}'; document.getElementById('admin-category-filter').form.submit()"
+                                        class="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-white/5 transition-colors {{ request('category') == $category->id ? 'text-black dark:text-white bg-gray-50 dark:bg-white/5' : 'text-gray-500 dark:text-gray-400' }}">
+                                    {{ ucwords($category->name) }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
                 </form>
             </div>
             

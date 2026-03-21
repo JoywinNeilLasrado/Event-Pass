@@ -1,7 +1,8 @@
-<nav x-data="{ open: false }" class="sticky top-0 z-50 bg-white/30 dark:bg-black/30 backdrop-blur-2xl border-b border-white/40 dark:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.05)] transition-colors duration-300">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+<div class="sticky top-4 z-50 px-4 sm:px-6 w-full max-w-7xl mx-auto transition-all duration-300">
+    <nav x-data="{ open: false }" class="relative bg-white dark:bg-[#1a1a1a] shadow-[0_4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] rounded-full border border-gray-200/60 dark:border-white/10 transition-colors duration-300">
+        <!-- Primary Navigation Menu -->
+        <div class="px-5 sm:px-8">
+            <div class="flex justify-between h-14 items-center">
             <div class="flex items-center gap-6 sm:gap-8">
                 <!-- Back to Welcome Page -->
                 <a href="{{ url('/') }}" class="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors" title="Back to Home">
@@ -105,10 +106,10 @@
                 </button>
             </div>
         </div>
-    </div>
+    </nav>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-white/40 dark:bg-black/40 backdrop-blur-xl border-b border-white/40 dark:border-white/10 shadow-lg transition-all duration-200 ease-in-out">
+    <div :class="{'block': open, 'hidden': ! open}" class="absolute top-full left-0 right-0 mt-3 hidden sm:hidden bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-xl border border-gray-200/60 dark:border-white/10 overflow-hidden z-50 origin-top animate-in ease-out duration-200">
         <div class="pt-2 pb-3 space-y-1">
             <a href="{{ route('events.index') }}" class="block w-full ps-3 pe-4 py-2 border-l-4 {{ request()->routeIs('events.index') ? 'border-black dark:border-white text-black dark:text-white font-bold bg-gray-50 dark:bg-white/10' : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-gray-600' }} text-base font-medium transition duration-150 ease-in-out">
                 Events
@@ -172,7 +173,7 @@
             </div>
         @endauth
     </div>
-</nav>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {

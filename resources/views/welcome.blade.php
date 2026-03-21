@@ -71,7 +71,7 @@
                 The ultimate premium platform to create, manage, and book events effortlessly. Immerse yourself in a world-class ticketing experience built for the modern creator.
             </p>
             
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 relative z-20">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 relative z-20 mb-16">
                 @auth
                     @if(Auth::user()->is_organizer)
                         <a href="{{ route('events.create') }}" class="btn-vercel text-lg px-10 py-4 w-full sm:w-auto shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300">Create an Event</a>
@@ -84,6 +84,11 @@
                     <a href="{{ route('register') }}" class="btn-vercel text-lg px-10 py-4 w-full sm:w-auto shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300">Start Building Events</a>
                     <a href="{{ route('events.index') }}" class="btn-vercel-secondary text-lg px-10 py-4 w-full sm:w-auto bg-white/50 dark:bg-white/5 backdrop-blur-md border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-all duration-300 text-gray-900 dark:text-white">Explore Events</a>
                 @endauth
+            </div>
+            
+            <!-- Category Carousel -->
+            <div class="relative z-30 mb-8 w-screen relative -left-[50vw] ml-[50%]">
+                <x-category-carousel :categories="$categories" />
             </div>
             
             @if(isset($featuredEvents) && $featuredEvents->count() > 0)

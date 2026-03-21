@@ -59,8 +59,8 @@
                                             Pay Now &rarr;
                                         </a>
                                     @else
-                                        <span class="text-sm font-semibold text-gray-400 dark:text-gray-500 group-hover:text-black dark:group-hover:text-white transition-colors flex items-center">
-                                            Details <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                                        <span class="relative z-10 bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 inline-block hover:scale-105 shadow-sm group-hover:shadow flex-shrink-0">
+                                            Book Now
                                         </span>
                                     @endif
                                 </div>

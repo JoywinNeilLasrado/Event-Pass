@@ -13,12 +13,19 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <!-- Category Carousel -->
+    @if(isset($categories) && $categories->count() > 0)
+        <div class="pt-6 sm:pt-10">
+            <x-category-carousel :categories="$categories" />
+        </div>
+    @endif
+
+    <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
             <!-- Search & Filter Form -->
-            <form method="GET" action="{{ route('events.index') }}" class="mb-8">
-                <div class="flex flex-col sm:flex-row gap-4 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-gray-100 dark:border-white/10 p-2 rounded-2xl shadow-sm transition-colors">
+            <form method="GET" action="{{ route('events.index') }}" class="mb-8 relative z-50">
+                <div class="flex flex-col sm:flex-row gap-4 bg-white/40 dark:bg-black/40 backdrop-blur-md border border-gray-100 dark:border-white/10 p-2 rounded-2xl shadow-sm transition-colors relative z-50">
                     <div class="flex-grow relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -26,15 +33,40 @@
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search events by title or location..." class="w-full pl-11 pr-4 py-3 bg-transparent border-none focus:ring-0 text-gray-900 dark:text-white placeholder-gray-500 font-medium transition-colors h-full rounded-xl">
                     </div>
                     @if(isset($categories) && $categories->count() > 0)
-                        <div class="sm:w-64 border-t sm:border-t-0 sm:border-l border-gray-100 dark:border-white/10 transition-colors">
-                            <select name="category" onchange="this.form.submit()" class="w-full py-3 px-4 bg-transparent border-none focus:ring-0 text-gray-600 dark:text-gray-300 font-medium cursor-pointer transition-colors h-full rounded-xl [color-scheme:light] dark:[color-scheme:dark]">
-                                <option value="" class="bg-white dark:bg-neutral-800">All Categories</option>
+                        <div class="sm:w-64 border-t sm:border-t-0 sm:border-l border-gray-100 dark:border-white/10 transition-colors relative" x-data="{ open: false }">
+                            <input type="hidden" name="category" value="{{ request('category') }}" id="category-filter">
+                            <button type="button" @click="open = !open" @click.outside="open = false" class="w-full py-3 px-4 bg-transparent border-none outline-none focus:ring-0 text-gray-600 dark:text-white font-medium cursor-pointer transition-colors h-full rounded-xl flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-white/5">
+                                <span>
+                                    @php
+                                        $selectedCategory = $categories->firstWhere('id', request('category'));
+                                    @endphp
+                                    {{ $selectedCategory ? $selectedCategory->name : 'All Categories' }}
+                                </span>
+                                <svg class="w-4 h-4 ml-2 transition-transform duration-200 text-gray-400" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute z-[100] left-0 right-0 mt-2 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-white/10 rounded-xl shadow-xl overflow-hidden py-1.5 max-h-60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-200 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:rounded-full"
+                                 style="display: none;">
+                                <button type="button" 
+                                        @click="document.getElementById('category-filter').value = ''; document.getElementById('category-filter').form.submit()"
+                                        class="w-full text-left px-5 py-2.5 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-white/5 transition-colors {{ request('category') == '' ? 'text-black dark:text-white bg-gray-50 dark:bg-white/5' : 'text-gray-500 dark:text-gray-400' }}">
+                                    All Categories
+                                </button>
                                 @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" class="bg-white dark:bg-neutral-800" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
+                                    <button type="button" 
+                                            @click="document.getElementById('category-filter').value = '{{ $category->id }}'; document.getElementById('category-filter').form.submit()"
+                                            class="w-full text-left px-5 py-2.5 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-white/5 transition-colors {{ request('category') == $category->id ? 'text-black dark:text-white bg-gray-50 dark:bg-white/5' : 'text-gray-500 dark:text-gray-400' }}">
+                                        {{ ucwords($category->name) }}
+                                    </button>
                                 @endforeach
-                            </select>
+                            </div>
                         </div>
                     @endif
                     <button type="submit" class="hidden sm:block btn-vercel px-6 py-2">Search</button>

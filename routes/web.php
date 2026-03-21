@@ -24,7 +24,9 @@ Route::get('/', function () {
         ->take(5)
         ->get();
         
-    return view('welcome', compact('featuredEvents'));
+    $categories = \App\Models\Category::all();
+        
+    return view('welcome', compact('featuredEvents', 'categories'));
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
