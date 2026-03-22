@@ -27,6 +27,11 @@ class UpgradeController extends Controller
             return redirect()->route('dashboard')->with('success', 'Welcome back! Your organizer account has been reactivated.');
         }
 
+        // Prevent rejected applications from bypassing the queue
+        if ($user->kyc_status === 'rejected') {
+            return redirect()->route('dashboard')->with('error', 'Your organizer application was previously rejected by an administrator. Please contact support to appeal.');
+        }
+
         $user->update([
             'is_organizer' => false, 
             'kyc_status' => 'pending_submission',
@@ -55,7 +60,7 @@ class UpgradeController extends Controller
                 'customer_id' => (string) auth()->id(),
                 'customer_name' => auth()->user()->name,
                 'customer_email' => auth()->user()->email,
-                'customer_phone' => '9999999999',
+                'customer_phone' => auth()->user()->phone ?? '9999999999',
             ],
             'order_meta' => [
                 'return_url' => route('payment.success') . '?order_id={order_id}',

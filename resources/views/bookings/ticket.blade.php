@@ -21,62 +21,64 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="ticket-wrapper">
-            <div class="ticket-header">
-                <h1>{{ $event->title }}</h1>
-                @if($booking->ticketType)
-                    <p style="color: #ecc94b; font-weight: bold; font-size: 16px; letter-spacing: 2px;">{{ strtoupper($booking->ticketType->name) }} TICKET</p>
-                @else
-                    <p>Passage Official Ticket</p>
-                @endif
-            </div>
-            <div class="ticket-body">
-                <table>
-                    <tr>
-                        <td style="width: 70%;">
-                            @if($booking->ticketType)
-                                <div class="label">Ticket Package</div>
-                                <div class="value">{{ $booking->ticketType->name }}</div>
-                            @endif
-
-                            <div class="label">Ticket Holder</div>
-                            <div class="value">{{ $booking->user->name }}</div>
-
-                            <div class="label">Date & Time</div>
-                            <div class="value">{{ $event->date->format('l, F j, Y') }} at {{ date('h:i A', strtotime($event->time)) }}</div>
-
-                            <div class="label">Location</div>
-                            <div class="value">{{ $event->location }}</div>
-
-                            <div class="label">Booking ID</div>
-                            <div class="value" style="font-family: monospace; font-size: 16px;">#EVT-{{ str_pad($event->id, 4, '0', STR_PAD_LEFT) }}-B{{ str_pad($booking->id, 4, '0', STR_PAD_LEFT) }}</div>
-
-                            <div class="label">Amount Paid</div>
-                            <div class="value" style="font-size: 16px;">
-                                @if($booking->amount_paid > 0)
-                                    ${{ number_format($booking->amount_paid, 2) }}
-                                @elseif($booking->ticketType && $booking->ticketType->price > 0 && $booking->amount_paid == 0)
-                                    100% Promo Code OFF
-                                @else
-                                    FREE
+    @foreach($bookings as $booking)
+        <div class="container" @if(!$loop->last) style="page-break-after: always;" @endif>
+            <div class="ticket-wrapper">
+                <div class="ticket-header">
+                    <h1>{{ $event->title }}</h1>
+                    @if($booking->ticketType)
+                        <p style="color: #ecc94b; font-weight: bold; font-size: 16px; letter-spacing: 2px;">{{ strtoupper($booking->ticketType->name) }} TICKET</p>
+                    @else
+                        <p>Passage Official Ticket</p>
+                    @endif
+                </div>
+                <div class="ticket-body">
+                    <table>
+                        <tr>
+                            <td style="width: 70%;">
+                                @if($booking->ticketType)
+                                    <div class="label">Ticket Package</div>
+                                    <div class="value">{{ $booking->ticketType->name }}</div>
                                 @endif
-                            </div>
-                        </td>
-                        <td style="width: 30%; text-align: right;">
-                            <div class="qr-wrapper">
-                                <img src="data:image/svg+xml;base64,{{ $qrCode }}" alt="QR Code" style="width: 250px; height: 250px; display: block; margin: 0 auto;">
-                                <div class="qr-placeholder" style="margin-top: 15px;">Scan for entry</div>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
+
+                                <div class="label">Ticket Holder</div>
+                                <div class="value">{{ $booking->user->name }}</div>
+
+                                <div class="label">Date & Time</div>
+                                <div class="value">{{ $event->date->format('l, F j, Y') }} at {{ date('h:i A', strtotime($event->time)) }}</div>
+
+                                <div class="label">Location</div>
+                                <div class="value">{{ $event->location }}</div>
+
+                                <div class="label">Booking ID</div>
+                                <div class="value" style="font-family: monospace; font-size: 16px;">#EVT-{{ str_pad($event->id, 4, '0', STR_PAD_LEFT) }}-B{{ str_pad($booking->id, 4, '0', STR_PAD_LEFT) }}</div>
+
+                                <div class="label">Amount Paid</div>
+                                <div class="value" style="font-size: 16px;">
+                                    @if($booking->amount_paid > 0)
+                                        ${{ number_format($booking->amount_paid, 2) }}
+                                    @elseif($booking->ticketType && $booking->ticketType->price > 0 && $booking->amount_paid == 0)
+                                        100% Promo Code OFF
+                                    @else
+                                        FREE
+                                    @endif
+                                </div>
+                            </td>
+                            <td style="width: 30%; text-align: right;">
+                                <div class="qr-wrapper">
+                                    <img src="data:image/svg+xml;base64,{{ $booking->qrCode }}" alt="QR Code" style="width: 250px; height: 250px; display: block; margin: 0 auto;">
+                                    <div class="qr-placeholder" style="margin-top: 15px;">Scan for entry</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="footer">
+                Generated via Passage on {{ now()->format('F j, Y, g:i a') }}<br>
+                Please present this ticket at the venue.
             </div>
         </div>
-        <div class="footer">
-            Generated via Passage on {{ now()->format('F j, Y, g:i a') }}<br>
-            Please present this ticket at the venue.
-        </div>
-    </div>
+    @endforeach
 </body>
 </html>

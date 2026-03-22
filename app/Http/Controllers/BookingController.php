@@ -15,14 +15,16 @@ class BookingController extends Controller
 {
     public function index(Request $request)
     {
-        $myBookings = $request->user()->bookings()
+        $bookings = $request->user()->bookings()
             ->with(['event' => function ($q) {
                 $q->withTrashed()->with(['category', 'user']);
-            }])
+            }, 'ticketType'])
             ->latest()
             ->get();
 
-        return view('bookings.index', compact('myBookings'));
+        $groupedBookings = $bookings->groupBy('event_id');
+
+        return view('bookings.index', compact('groupedBookings'));
     }
 
     public function store(Request $request, Event $event)
@@ -118,7 +120,7 @@ class BookingController extends Controller
                     'customer_id' => (string) auth()->id(),
                     'customer_name' => auth()->user()->name,
                     'customer_email' => auth()->user()->email,
-                    'customer_phone' => '9999999999',
+                    'customer_phone' => auth()->user()->phone ?? '9999999999',
                 ],
                 'order_meta' => [
                     'return_url' => route('payment.success') . '?order_id={order_id}',
@@ -163,16 +165,31 @@ class BookingController extends Controller
 
     public function destroy(Request $request, Event $event)
     {
-        $booking = $event->bookings()->where('user_id', auth()->id())->first();
+        $request->validate([
+            'quantity' => 'nullable|integer|min:1'
+        ]);
 
-        if (!$booking) {
+        $bookings = $event->bookings()->where('user_id', auth()->id())->get();
+
+        if ($bookings->isEmpty()) {
             return back()->with('error', 'You do not have a booking for this event.');
         }
 
-        $ticketTypeId = $booking->ticket_type_id;
+        $cancelQuantity = $request->input('quantity', $bookings->count());
+        
+        if ($cancelQuantity > $bookings->count()) {
+            return back()->with('error', 'You cannot cancel more tickets than you own.');
+        }
+
+        $bookingsToCancel = $bookings->take($cancelQuantity);
+
+        $ticketTypeId = $bookingsToCancel->first()->ticket_type_id;
+        $totalRefund = $bookingsToCancel->sum('amount_paid');
+        $cashfreeOrderId = $bookingsToCancel->first()->cashfree_order_id;
+        $isPaid = $bookingsToCancel->first()->payment_status === 'paid';
 
         // Process Refund if applicable
-        if ($booking->payment_status === 'paid' && $booking->cashfree_order_id) {
+        if ($isPaid && $cashfreeOrderId && $totalRefund > 0) {
             try {
                 $appId = config('services.cashfree.app_id');
                 $secretKey = config('services.cashfree.secret_key');
@@ -185,49 +202,54 @@ class BookingController extends Controller
                     'x-api-version' => '2023-08-01',
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
-                ])->post($baseUrl . '/orders/' . $booking->cashfree_order_id . '/refunds', [
-                    'refund_amount' => $booking->amount_paid,
-                    'refund_id' => 'REF_' . $booking->id . '_' . time(),
+                ])->post($baseUrl . '/orders/' . $cashfreeOrderId . '/refunds', [
+                    'refund_amount' => $totalRefund,
+                    'refund_id' => 'REF_' . $bookingsToCancel->first()->id . '_' . time(),
                 ]);
             } catch (\Exception $e) {
                 return back()->with('error', 'Failed to process refund automatically. Please contact support. Error: ' . $e->getMessage());
             }
         }
 
-        DB::transaction(function () use ($booking) {
-            $booking->delete();
+        DB::transaction(function () use ($bookingsToCancel) {
+            foreach ($bookingsToCancel as $booking) {
+                $booking->delete();
+            }
         });
 
-        $waitlistedUser = $event->waitlists()
+        $freedSpots = $bookingsToCancel->count();
+        $waitlistedUsers = $event->waitlists()
             ->where('ticket_type_id', $ticketTypeId)
             ->where('status', 'pending')
             ->orderBy('created_at', 'asc')
-            ->first();
+            ->take($freedSpots)
+            ->get();
 
-        if ($waitlistedUser) {
+        foreach ($waitlistedUsers as $waitlistedUser) {
             \Illuminate\Support\Facades\Mail::to($waitlistedUser->user->email)->send(new \App\Mail\WaitlistAvailable($waitlistedUser));
             $waitlistedUser->update(['status' => 'notified']);
         }
 
-        return back()->with('success', 'Your ticket has been cancelled and the seat has been returned. 🔓');
+        return back()->with('success', "Your {$freedSpots} ticket(s) have been cancelled and seats returned. 🔓");
     }
 
     public function downloadTicket(Request $request, Event $event)
     {
-        $booking = $event->bookings()->where('user_id', auth()->id())->first();
+        $bookings = $event->bookings()->where('user_id', auth()->id())->get();
 
-        if (!$booking) {
+        if ($bookings->isEmpty()) {
             return back()->with('error', 'You do not have a booking for this event.');
         }
 
-        // fetch SVG format. QRServer uses SVG fills rather than strokes, which DomPDF handles perfectly.
-        $verifyUrl = URL::signedRoute('tickets.verify', ['booking' => $booking->id]);
-        $svgData = file_get_contents('https://api.qrserver.com/v1/create-qr-code/?size=200x200&format=svg&data=' . urlencode($verifyUrl));
-        $qrCode = base64_encode($svgData);
+        foreach ($bookings as $booking) {
+            $verifyUrl = URL::signedRoute('tickets.verify', ['booking' => $booking->id]);
+            $svgData = file_get_contents('https://api.qrserver.com/v1/create-qr-code/?size=200x200&format=svg&data=' . urlencode($verifyUrl));
+            $booking->qrCode = base64_encode($svgData);
+        }
 
-        $pdf = Pdf::loadView('bookings.ticket', compact('booking', 'event', 'qrCode'));
+        $pdf = Pdf::loadView('bookings.ticket', compact('bookings', 'event'));
 
-        return $pdf->stream('Passage-Ticket-' . $event->id . '.pdf');
+        return $pdf->stream('Passage-Tickets-' . $event->id . '.pdf');
     }
 
     public function verifyTicket(Request $request, Booking $booking)

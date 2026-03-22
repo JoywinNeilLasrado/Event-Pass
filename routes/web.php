@@ -58,7 +58,7 @@ Route::middleware(['auth', 'organizer'])->group(function () {
 
 // Public: show a single event (wildcard comes AFTER /create)
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
-Route::post('/events/{event}/promo-codes/validate', [PromoCodeController::class, 'validateCode'])->name('promo_codes.validate');
+Route::post('/events/{event}/promo-codes/validate', [PromoCodeController::class, 'validateCode'])->name('promo_codes.validate')->middleware('throttle:10,1');
 
 // Auth + ownership: edit, update, delete, manage attendees
 Route::middleware(['auth', 'event.owner'])->group(function () {
@@ -84,15 +84,15 @@ Route::middleware('auth')->group(function () {
 
     // Upgrade
     Route::get('/upgrade', [UpgradeController::class, 'index'])->name('upgrade.index');
-    Route::post('/upgrade/basic', [UpgradeController::class, 'checkoutBasic'])->name('upgrade.basic');
-    Route::post('/upgrade/pro', [UpgradeController::class, 'checkoutPro'])->name('upgrade.pro');
+    Route::post('/upgrade/basic', [UpgradeController::class, 'checkoutBasic'])->name('upgrade.basic')->middleware('throttle:5,1');
+    Route::post('/upgrade/pro', [UpgradeController::class, 'checkoutPro'])->name('upgrade.pro')->middleware('throttle:5,1');
     Route::post('/upgrade/cancel', [UpgradeController::class, 'cancel'])->name('upgrade.cancel');
 
     // Bookings
     Route::get('/my-tickets', [BookingController::class, 'index'])->name('bookings.index');
-    Route::post('/events/{event}/book', [BookingController::class, 'store'])->name('bookings.store');
+    Route::post('/events/{event}/book', [BookingController::class, 'store'])->name('bookings.store')->middleware('throttle:10,1');
     Route::delete('/events/{event}/cancel', [BookingController::class, 'destroy'])->name('bookings.destroy');
-    Route::post('/events/{event}/waitlist', [WaitlistController::class, 'store'])->name('waitlists.store');
+    Route::post('/events/{event}/waitlist', [WaitlistController::class, 'store'])->name('waitlists.store')->middleware('throttle:10,1');
     Route::get('/events/{event}/ticket', [BookingController::class, 'downloadTicket'])->name('bookings.ticket');
     Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
     Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');

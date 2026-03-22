@@ -107,7 +107,7 @@ class EventController extends Controller
                     'customer_id' => (string) auth()->id(),
                     'customer_name' => auth()->user()->name,
                     'customer_email' => auth()->user()->email,
-                    'customer_phone' => '9999999999',
+                    'customer_phone' => auth()->user()->phone ?? '9999999999',
                 ],
                 'order_meta' => [
                     'return_url' => route('payment.success') . '?order_id={order_id}',
