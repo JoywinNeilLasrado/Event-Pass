@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/cashfree/webhook', [PaymentController::class, 'webhook'])->name('cashfree.webhook');
 
 Route::get('/', function () {
-    $featuredEvents = \App\Models\Event::where('is_featured', true)
+    $featuredEvents = Event::where('is_featured', true)
         ->where('is_published', true)
         ->where(function ($query) {
             $query->where('date', '>', now()->toDateString())

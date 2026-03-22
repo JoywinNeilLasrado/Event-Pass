@@ -226,7 +226,7 @@ class BookingController extends Controller
             ->get();
 
         foreach ($waitlistedUsers as $waitlistedUser) {
-            \Illuminate\Support\Facades\Mail::to($waitlistedUser->user->email)->send(new \App\Mail\WaitlistAvailable($waitlistedUser));
+            Mail::to($waitlistedUser->user->email)->send(new \App\Mail\WaitlistAvailable($waitlistedUser));
             $waitlistedUser->update(['status' => 'notified']);
         }
 

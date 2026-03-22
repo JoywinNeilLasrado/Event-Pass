@@ -11,7 +11,7 @@ class PaymentController extends Controller
 {
     public function success(Request $request)
     {
-        $order_id = $request->get('order_id');
+        $order_id = $request->input('order_id');
         if (!$order_id) {
             return redirect()->route('events.index')->with('error', 'Invalid payment session.');
         }

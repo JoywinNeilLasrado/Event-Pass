@@ -18,7 +18,7 @@ class AdminFinancialsController extends Controller
         $proSubscribersCount = \App\Models\User::where('has_unlimited_events', true)->count();
         $proRevenue = $proSubscribersCount * $organizerFee;
 
-        $paidEventsCount = \App\Models\Event::where('payment_status', 'paid')
+        $paidEventsCount = Event::where('payment_status', 'paid')
                                             ->whereNotNull('cashfree_order_id')
                                             ->where('cashfree_order_id', 'like', 'EVENT_%')
                                             ->count();
