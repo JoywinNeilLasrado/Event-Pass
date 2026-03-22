@@ -249,13 +249,57 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 transition-colors">Category <span class="text-red-500 dark:text-red-400">*</span></label>
-                            <select name="category_id" required class="form-input-vercel px-4 py-3 cursor-pointer">
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('category_id', $event->category_id) == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div x-data="{ 
+                                open: false, 
+                                value: '{{ old('category_id', $event->category_id) }}', 
+                                label: 'Select a category',
+                                options: [
+                                    @foreach($categories as $category)
+                                    { id: '{{ $category->id }}', name: '{{ addslashes($category->name) }}' },
+                                    @endforeach
+                                ],
+                                init() {
+                                    if (this.value) {
+                                        let selected = this.options.find(o => o.id == this.value);
+                                        if (selected) this.label = selected.name;
+                                    }
+                                },
+                                selectOption(id, name) {
+                                    this.value = id;
+                                    this.label = name;
+                                    this.open = false;
+                                }
+                            }" @click.away="open = false" class="relative">
+                                
+                                <input type="hidden" name="category_id" x-model="value">
+                                
+                                <button type="button" @click="open = !open" 
+                                        class="form-input-vercel px-4 py-3 w-full text-left flex justify-between items-center transition-all">
+                                    <span x-text="label" :class="{ 'text-gray-500 dark:text-gray-400': !value, 'text-gray-900 dark:text-white': value }"></span>
+                                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                            
+                                <div x-show="open" x-cloak
+                                     x-transition:enter="transition ease-out duration-100"
+                                     x-transition:enter-start="transform opacity-0 scale-95"
+                                     x-transition:enter-end="transform opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-75"
+                                     x-transition:leave-start="transform opacity-100 scale-100"
+                                     x-transition:leave-end="transform opacity-0 scale-95"
+                                     class="absolute z-50 w-full mt-2 bg-white/90 dark:bg-[#111]/95 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden">
+                                    
+                                    <div class="max-h-60 overflow-y-auto py-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                                        <template x-for="option in options" :key="option.id">
+                                            <button type="button" @click="selectOption(option.id, option.name)"
+                                                    class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors flex items-center justify-between"
+                                                    :class="{ 'bg-gray-50 dark:bg-white/5': value == option.id }">
+                                                <span x-text="option.name" :class="{ 'font-semibold text-indigo-600 dark:text-indigo-400': value == option.id, 'text-gray-900 dark:text-gray-100': value != option.id }"></span>
+                                                <svg x-show="value == option.id" class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

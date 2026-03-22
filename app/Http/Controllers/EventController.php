@@ -240,6 +240,7 @@ class EventController extends Controller
         }
 
         $data['available_tickets'] = collect($data['tickets'])->sum('capacity');
+        $data['is_featured'] = $request->boolean('is_featured');
         $event->update($data);
         $event->tags()->sync($request->input('tags', []));
 

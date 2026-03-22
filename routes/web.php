@@ -18,7 +18,14 @@ Route::post('/cashfree/webhook', [PaymentController::class, 'webhook'])->name('c
 
 Route::get('/', function () {
     $featuredEvents = \App\Models\Event::where('is_featured', true)
-        ->where('date', '>=', now()->toDateString())
+        ->where('is_published', true)
+        ->where(function ($query) {
+            $query->where('date', '>', now()->toDateString())
+                  ->orWhere(function ($q) {
+                      $q->where('date', '=', now()->toDateString())
+                        ->where('time', '>=', now()->toTimeString());
+                  });
+        })
         ->orderBy('date', 'asc')
         ->with('category', 'tags')
         ->take(5)

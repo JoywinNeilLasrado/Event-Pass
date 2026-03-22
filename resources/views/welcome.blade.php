@@ -93,15 +93,23 @@
             
             @if(isset($featuredEvents) && $featuredEvents->count() > 0)
                 <!-- Featured Events Carousel -->
-                <div class="mt-24 sm:mt-32 w-full max-w-[100vw] overflow-hidden" x-data="{
-                    activeSlide: 0,
-                    slides: {{ $featuredEvents->count() }},
-                    next() { this.activeSlide = this.activeSlide === this.slides - 1 ? 0 : this.activeSlide + 1 },
-                    prev() { this.activeSlide = this.activeSlide === 0 ? this.slides - 1 : this.activeSlide - 1 },
-                    init() {
-                        setInterval(() => { this.next() }, 5000); // Auto-scroll every 5 seconds
-                    }
-                }">
+                <div class="mt-24 sm:mt-32 w-full max-w-[100vw] overflow-hidden" 
+                     x-data="{
+                        activeSlide: 0,
+                        slides: {{ $featuredEvents->count() }},
+                        timer: null,
+                        next() { this.activeSlide = this.activeSlide === this.slides - 1 ? 0 : this.activeSlide + 1 },
+                        prev() { this.activeSlide = this.activeSlide === 0 ? this.slides - 1 : this.activeSlide - 1 },
+                        startTimer() {
+                            this.timer = setInterval(() => { this.next() }, 2000);
+                        },
+                        stopTimer() {
+                            clearInterval(this.timer);
+                        }
+                     }"
+                     x-init="startTimer()"
+                     @mouseenter="stopTimer()"
+                     @mouseleave="startTimer()">
                     <div class="flex items-center justify-between mb-8 px-4 sm:px-0 max-w-7xl mx-auto">
                         <div class="text-left">
                             <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">Featured Events</h2>

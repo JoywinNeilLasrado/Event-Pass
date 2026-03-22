@@ -14,48 +14,91 @@ $categoryImages = [
 ];
 @endphp
 
-<div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-2">
-    <div class="flex overflow-x-auto gap-6 sm:gap-8 pb-4 scrollbar-hide snap-x pt-2">
-        @foreach($categories as $category)
-            @php
-                $slug = strtolower($category->slug);
-                // Priority: Uploaded Image -> Map Fallback -> Default Placeholder
-                if ($category->image_path) {
-                    $image = \Illuminate\Support\Facades\Storage::url($category->image_path);
-                } else {
-                    $image = $categoryImages[$slug] ?? 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=200&h=200';
-                }
-                $isActive = request('category') == $category->id || request('category_slug') == $slug;
-            @endphp
-            
-            <a href="{{ route('events.index', ['category' => $category->id]) }}" 
-               class="flex flex-col items-center gap-3 group min-w-max shrink-0 snap-start outline-none">
+<div class="relative w-full overflow-hidden py-6 pb-2 group mask-edges">
+    <!-- Extremely wide container that holds 2 identical sets of items to scroll seamlessly -->
+    <div class="flex w-max flex-shrink-0 animate-scrollX hover:[animation-play-state:paused] pt-2 pb-4">
+        
+        <!-- SET 1 -->
+        <div class="flex flex-nowrap">
+            @foreach($categories as $category)
+                @php
+                    $slug = strtolower($category->slug);
+                    if ($category->image_path) {
+                        $image = \Illuminate\Support\Facades\Storage::url($category->image_path);
+                    } else {
+                        $image = $categoryImages[$slug] ?? 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=200&h=200';
+                    }
+                    $isActive = request('category') == $category->id || request('category_slug') == $slug;
+                @endphp
                 
-                <div class="relative w-[88px] h-[88px] sm:w-[104px] sm:h-[104px] rounded-full p-[3px] transition-transform duration-300 group-hover:scale-105 group-focus-visible:ring-4 group-focus-visible:ring-red-500/50 {{ $isActive ? 'bg-gradient-to-tr from-rose-500 to-red-600 shadow-lg shadow-red-500/30' : 'bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-white/10 dark:to-white/20 hover:from-rose-500 hover:to-red-600' }}">
-                    <div class="w-full h-full rounded-full border-[3px] border-white dark:border-[#0a0a0a] overflow-hidden bg-gray-100 dark:bg-gray-800">
-                        <img src="{{ $image }}" 
-                             alt="{{ ucwords($category->name) }}" 
-                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 {{ $isActive ? '' : 'filter contrast-[0.95]' }}"
-                             loading="lazy">
-                    </div>
-                </div>
+                <div class="pr-6 sm:pr-8">
+                    <a href="{{ route('events.index', ['category' => $category->id]) }}" 
+                       class="flex flex-col items-center gap-3 group min-w-max shrink-0 outline-none">
+                        
+                        <div class="relative w-[88px] h-[88px] sm:w-[104px] sm:h-[104px] rounded-full p-[3px] transition-transform duration-300 group-hover:scale-105 group-focus-visible:ring-4 group-focus-visible:ring-red-500/50 {{ $isActive ? 'bg-gradient-to-tr from-rose-500 to-red-600 shadow-lg shadow-red-500/30' : 'bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-white/10 dark:to-white/20 hover:from-rose-500 hover:to-red-600' }}">
+                            <div class="w-full h-full rounded-full border-[3px] border-white dark:border-[#0a0a0a] overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                <img src="{{ $image }}" 
+                                     alt="{{ ucwords($category->name) }}" 
+                                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 {{ $isActive ? '' : 'filter contrast-[0.95]' }}"
+                                     loading="lazy">
+                            </div>
+                        </div>
 
-                <span class="text-xs sm:text-[13px] font-semibold tracking-wide transition-colors {{ $isActive ? 'text-red-600 dark:text-red-400 font-bold' : 'text-gray-600 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white' }}">
-                    {{ ucwords($category->name) }}
-                </span>
-            </a>
-        @endforeach
+                        <span class="text-xs sm:text-[13px] font-semibold tracking-wide transition-colors {{ $isActive ? 'text-red-600 dark:text-red-400 font-bold' : 'text-gray-600 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white' }}">
+                            {{ ucwords($category->name) }}
+                        </span>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- SET 2 (Exact Duplicate for Seamless Loop) -->
+        <div class="flex flex-nowrap" aria-hidden="true">
+            @foreach($categories as $category)
+                @php
+                    $slug = strtolower($category->slug);
+                    if ($category->image_path) {
+                        $image = \Illuminate\Support\Facades\Storage::url($category->image_path);
+                    } else {
+                        $image = $categoryImages[$slug] ?? 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=200&h=200';
+                    }
+                    $isActive = request('category') == $category->id || request('category_slug') == $slug;
+                @endphp
+                
+                <div class="pr-6 sm:pr-8">
+                    <a href="{{ route('events.index', ['category' => $category->id]) }}" 
+                       class="flex flex-col items-center gap-3 group min-w-max shrink-0 outline-none tabindex=-1">
+                        
+                        <div class="relative w-[88px] h-[88px] sm:w-[104px] sm:h-[104px] rounded-full p-[3px] transition-transform duration-300 group-hover:scale-105 {{ $isActive ? 'bg-gradient-to-tr from-rose-500 to-red-600 shadow-lg shadow-red-500/30' : 'bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-white/10 dark:to-white/20 hover:from-rose-500 hover:to-red-600' }}">
+                            <div class="w-full h-full rounded-full border-[3px] border-white dark:border-[#0a0a0a] overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                <img src="{{ $image }}" 
+                                     alt="{{ ucwords($category->name) }}" 
+                                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 {{ $isActive ? '' : 'filter contrast-[0.95]' }}"
+                                     loading="lazy">
+                            </div>
+                        </div>
+
+                        <span class="text-xs sm:text-[13px] font-semibold tracking-wide transition-colors {{ $isActive ? 'text-red-600 dark:text-red-400 font-bold' : 'text-gray-600 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white' }}">
+                            {{ ucwords($category->name) }}
+                        </span>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+
     </div>
 </div>
 
 <style>
-/* Hide scrollbar for Chrome, Safari and Opera */
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
+@keyframes scrollX {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
-/* Hide scrollbar for IE, Edge and Firefox */
-.scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+.animate-scrollX {
+    animation: scrollX 35s linear infinite;
+}
+.mask-edges {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 </style>
