@@ -44,7 +44,7 @@
                 <div class="flex-1 min-w-0"
                      x-data="{
                          active: 0,
-                         banners: {{ json_encode(is_array($event->images) && count($event->images) > 0 ? $event->images : ($event->poster_image ? [$event->poster_image] : [])) }},
+                         banners: @json(collect(is_array($event->images) && count($event->images) > 0 ? $event->images : ($event->poster_image ? [$event->poster_image] : []))->map(fn($img) => Storage::url($img))->values()),
                          timer: null,
                          startTimer() {
                              if(this.banners.length > 1) {
@@ -75,7 +75,7 @@
                                          x-transition:leave="transition-opacity duration-700"
                                          x-transition:leave-start="opacity-100"
                                          x-transition:leave-end="opacity-0">
-                                        <img :src="'{{ rtrim(Storage::url(''), '/') }}/' + banner" class="w-full h-full object-cover" :alt="'Banner ' + (index + 1)">
+                                        <img :src="banner" class="w-full h-full object-cover" :alt="'Banner ' + (index + 1)">
                                     </div>
                                 </template>
                             </div>
