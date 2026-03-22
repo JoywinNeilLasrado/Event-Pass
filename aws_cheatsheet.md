@@ -37,11 +37,14 @@ Immediately after closing `nano`, you *must* force the server to read the new ch
 php artisan optimize:clear
 ```
 
-## 4. 🧹 The "Break The Cache" Commands
-If you update a configuration, add a new variable to `.env`, or change a massive blade file and the live website *isn't showing the new changes*, run these to forcibly wipe Laravel's memory:
+## 4. 🧹 The "Break The Cache" Command
+If you update a configuration, add a new variable to `.env`, or pull fresh code from GitHub and the website isn't showing the new changes, you must wipe the memory!
+
+Instead of running `route:clear`, `cache:clear`, and `config:clear` separately, Laravel has one ultimate shortcut command that forcefully wipes all 5 memory layers simultaneously:
 ```bash
-php artisan optimize:clear           # Nukes EVERYTHING (Views, Config, Routes)
+php artisan optimize:clear
 ```
+*(This one exact command automatically runs `route:clear`, `config:clear`, `cache:clear`, `view:clear`, and `event:clear` all at the exact same time!)*
 
 ## 5. 🤖 The Background Worker (Supervisor) Commands
 If an automated email gets stuck, or if you completely change how the "Ticket Booked" email looks and you need to restart the background queue daemon so it reads the new code:

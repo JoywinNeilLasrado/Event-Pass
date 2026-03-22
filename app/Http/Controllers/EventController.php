@@ -55,13 +55,13 @@ class EventController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('poster_image')) {
-            $data['poster_image'] = $request->file('poster_image')->store('posters', 'public');
+            $data['poster_image'] = $request->file('poster_image')->store('posters');
         }
 
         if ($request->hasFile('images')) {
             $imagesArray = [];
             foreach ($request->file('images') as $index => $file) {
-                $path = $file->store('posters', 'public');
+                $path = $file->store('posters');
                 $imagesArray[] = $path;
                 
                 // Fallback: If no primary poster was explicitly uploaded, set the first gallery image as the main event poster
@@ -218,9 +218,9 @@ class EventController extends Controller
 
         if ($request->hasFile('poster_image')) {
             if ($event->poster_image) {
-                Storage::disk('public')->delete($event->poster_image);
+                Storage::delete($event->poster_image);
             }
-            $data['poster_image'] = $request->file('poster_image')->store('posters', 'public');
+            $data['poster_image'] = $request->file('poster_image')->store('posters');
         }
 
         if ($request->hasFile('images')) {
@@ -228,7 +228,7 @@ class EventController extends Controller
             $imagesArray = $event->images ?? [];
             foreach ($request->file('images') as $file) {
                 // we technically append new images to the gallery here
-                $path = $file->store('posters', 'public');
+                $path = $file->store('posters');
                 $imagesArray[] = $path;
             }
             $data['images'] = $imagesArray;

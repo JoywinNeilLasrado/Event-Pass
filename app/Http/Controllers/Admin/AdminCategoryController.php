@@ -24,7 +24,7 @@ class AdminCategoryController extends Controller
         
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('categories', 'public');
+            $imagePath = $request->file('image')->store('categories');
         }
 
         Category::create([
@@ -49,9 +49,9 @@ class AdminCategoryController extends Controller
         
         if ($request->hasFile('image')) {
             if ($category->image_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($category->image_path);
+                \Illuminate\Support\Facades\Storage::delete($category->image_path);
             }
-            $category->image_path = $request->file('image')->store('categories', 'public');
+            $category->image_path = $request->file('image')->store('categories');
         }
 
         $category->name = $data['name'];
@@ -64,7 +64,7 @@ class AdminCategoryController extends Controller
     public function destroy(Category $category)
     {
         if ($category->image_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($category->image_path);
+            \Illuminate\Support\Facades\Storage::delete($category->image_path);
         }
         $category->delete();
         return back()->with('success', "Category \"{$category->name}\" deleted.");
