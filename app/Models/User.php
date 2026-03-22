@@ -27,6 +27,18 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Determine if the user is an organizer.
+     * Admins are automatically considered organizers.
+     *
+     * @param  bool  $value
+     * @return bool
+     */
+    public function getIsOrganizerAttribute($value)
+    {
+        return $this->is_admin || (bool) $value;
+    }
+
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);
