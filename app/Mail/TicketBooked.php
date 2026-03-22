@@ -42,9 +42,10 @@ class TicketBooked extends Mailable implements ShouldQueue
 
         $verifyUrl = URL::signedRoute('tickets.verify', ['booking' => $booking->id]);
         $svgData = file_get_contents('https://api.qrserver.com/v1/create-qr-code/?size=200x200&format=svg&data=' . urlencode($verifyUrl));
-        $qrCode = base64_encode($svgData);
+        $booking->qrCode = base64_encode($svgData);
 
-        $pdf = Pdf::loadView('bookings.ticket', compact('booking', 'event', 'qrCode'));
+        $bookings = [$booking];
+        $pdf = Pdf::loadView('bookings.ticket', compact('bookings', 'event'));
 
         return [
             Attachment::fromData(fn () => $pdf->output(), 'Passage-Ticket-' . $event->id . '.pdf')
