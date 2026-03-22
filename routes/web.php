@@ -112,17 +112,19 @@ Route::get('/tickets/verify/{booking}', [BookingController::class, 'verifyTicket
 Route::post('/tickets/checkin/{booking}', [BookingController::class, 'checkInTicket'])->name('tickets.checkin')->middleware('auth');
 
 // --- API Resource Route ---
-Route::get('/api/events', function () {
-    $events = Event::with(['category', 'user', 'tags'])->get();
+Route::middleware('auth')->get('/api/events', function () {
+    $events = Event::with(['category', 'user', 'tags'])->paginate(15);
     return EventResource::collection($events);
 })->name('api.events');
 
 // --- Developer Mail Preview Route ---
-Route::get('/preview-reminder', function () {
-    $event = Event::first();
-    $booking = App\Models\Booking::first();
-    return new App\Mail\EventReminder($event, $booking);
-});
+if (app()->environment('local')) {
+    Route::get('/preview-reminder', function () {
+        $event = Event::first();
+        $booking = App\Models\Booking::first();
+        return new App\Mail\EventReminder($event, $booking);
+    });
+}
 
 // --- KYC Verification Flow ---
 Route::middleware(['auth'])->group(function () {
