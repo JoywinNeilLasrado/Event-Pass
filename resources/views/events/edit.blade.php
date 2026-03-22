@@ -395,7 +395,7 @@
                             @if($event->poster_image)
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-widest font-bold">Current Poster</p>
                                 <div class="relative w-full max-w-xs mx-auto aspect-[4/5] rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm bg-gray-50 dark:bg-white/5 transition-colors mb-6">
-                                    <img src="/storage/{{ $event->poster_image }}" class="object-cover w-full h-full">
+                                    <img src="{{ Storage::url($event->poster_image) }}" class="object-cover w-full h-full">
                                 </div>
                             @endif
                             <div x-data="singleImagePreviewer()" class="flex flex-col gap-4 w-full">
@@ -422,7 +422,7 @@
                                 <div class="grid grid-cols-2 gap-4 mb-6">
                                     @foreach($event->images as $imgPath)
                                         <div class="relative aspect-[16/9] rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm bg-gray-50 dark:bg-white/5 transition-colors">
-                                            <img src="/storage/{{ $imgPath }}" class="object-cover w-full h-full">
+                                            <img src="{{ Storage::url($imgPath) }}" class="object-cover w-full h-full">
                                         </div>
                                     @endforeach
                                 </div>
