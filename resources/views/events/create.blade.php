@@ -383,41 +383,91 @@
                     <hr class="border-gray-100 dark:border-white/10 transition-colors">
 
                     <!-- Media Group -->
-                    <div x-data="imagePreviewer()">
-                        <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 transition-colors">Event Posters & Gallery</label>
-                        <div class="flex flex-col gap-4 w-full">
-                            <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 dark:border-white/20 border-dashed rounded-lg cursor-pointer bg-white/30 dark:bg-white/5 backdrop-blur-sm hover:bg-white/40 dark:hover:bg-white/10 transition-colors">
-                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <svg class="w-8 h-8 mb-3 text-gray-400 dark:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                    <p class="mb-1 text-sm text-gray-500 dark:text-gray-400 font-semibold transition-colors">Click to upload or drag multiple files here</p>
-                                    <p class="text-xs text-gray-400 dark:text-gray-500 transition-colors">SVG, PNG, JPG (MAX. 2MB each)</p>
-                                </div>
-                                <input type="file" name="images[]" multiple accept="image/*" class="hidden" @change="fileChosen">
-                            </label>
-
-                            <!-- Live Preview Area -->
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" x-show="imageUrls.length > 0" x-cloak>
-                                <template x-for="(url, index) in imageUrls" :key="index">
-                                    <div class="relative group aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm bg-gray-50 dark:bg-white/5 transition-colors">
-                                        <img :src="url" class="object-cover w-full h-full">
-                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <span class="text-xs font-bold text-white uppercase tracking-widest bg-black/50 px-2 py-1 rounded">Preview</span>
-                                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Poster Image (Single) -->
+                        <div x-data="singleImagePreviewer()">
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 transition-colors">Event Poster (Vertical) <span class="text-red-500 dark:text-red-400">*</span></label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Upload a portrait image for the main card display.</p>
+                            <div class="flex flex-col gap-4 w-full">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 dark:border-white/20 border-dashed rounded-lg cursor-pointer bg-white/30 dark:bg-white/5 backdrop-blur-sm hover:bg-white/40 dark:hover:bg-white/10 transition-colors relative overflow-hidden">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <svg class="w-8 h-8 mb-3 text-indigo-400 dark:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <p class="mb-1 text-sm text-gray-500 dark:text-gray-400 font-semibold"><span x-text="fileName ? 'Click to change' : 'Upload Poster'"></span></p>
                                     </div>
-                                </template>
+                                    <input type="file" name="poster_image" accept="image/*" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" @change="fileChosen">
+                                </label>
+                                
+                                <div class="relative group aspect-[4/5] w-full max-w-xs mx-auto rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm bg-gray-50 dark:bg-white/5 transition-colors" x-show="imageUrl" x-cloak>
+                                    <img :src="imageUrl" class="object-cover w-full h-full">
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Banner Images (Multiple) -->
+                        <div x-data="multiImagePreviewer()">
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 transition-colors">Banner Carousel (Landscape)</label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Upload landscape images for the event details page.</p>
+                            <div class="flex flex-col gap-4 w-full">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 dark:border-white/20 border-dashed rounded-lg cursor-pointer bg-white/30 dark:bg-white/5 backdrop-blur-sm hover:bg-white/40 dark:hover:bg-white/10 transition-colors relative overflow-hidden">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6 pointer-events-none">
+                                        <svg class="w-8 h-8 mb-3 text-purple-400 dark:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                        <p class="mb-1 text-sm text-gray-500 dark:text-gray-400 font-semibold">Upload Banners</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500">Multiple files allowed</p>
+                                    </div>
+                                    <input type="file" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" @change="fileChosen" x-ref="multiInput">
+                                    <!-- We use a hidden input synchronized with Alpine to submit the actual files if needed, but wait! The easiest way is to push the DataTransfer back to the original input. -->
+                                </label>
+                                
+                                <div class="grid grid-cols-2 gap-4" x-show="imageUrls.length > 0" x-cloak>
+                                    <template x-for="(url, index) in imageUrls" :key="index">
+                                        <div class="relative group aspect-[16/9] rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 shadow-sm bg-gray-50 dark:bg-white/5 transition-colors">
+                                            <img :src="url" class="object-cover w-full h-full">
+                                            <button type="button" @click.stop="removeImage(index)" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full shadow-md transition-colors opacity-0 group-hover:opacity-100 z-10 focus:outline-none focus:opacity-100">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+                                            <div class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-center py-2 text-xs font-bold uppercase tracking-widest backdrop-blur-md pointer-events-none">Preview</div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden actual input to hold all accumulated files -->
+                            <input type="file" name="images[]" multiple class="hidden" x-ref="hiddenUploadInput">
+                        </div>
                     </div>
+                    
                     <script>
                         document.addEventListener('alpine:init', () => {
-                            Alpine.data('imagePreviewer', () => ({
-                                imageUrls: [],
+                            Alpine.data('singleImagePreviewer', () => ({
+                                imageUrl: '',
+                                fileName: '',
                                 fileChosen(event) {
-                                    this.imageUrls = [];
-                                    const files = event.target.files;
-                                    for (let i = 0; i < files.length; i++) {
-                                        this.imageUrls.push(URL.createObjectURL(files[i]));
+                                    const file = event.target.files[0];
+                                    if(file) {
+                                        this.imageUrl = URL.createObjectURL(file);
+                                        this.fileName = file.name;
                                     }
+                                }
+                            }));
+                            Alpine.data('multiImagePreviewer', () => ({
+                                imageUrls: [],
+                                dt: new DataTransfer(),
+                                fileChosen(event) {
+                                    const newFiles = event.target.files;
+                                    for (let i = 0; i < newFiles.length; i++) {
+                                        this.dt.items.add(newFiles[i]);
+                                        this.imageUrls.push(URL.createObjectURL(newFiles[i]));
+                                    }
+                                    this.$refs.hiddenUploadInput.files = this.dt.files;
+                                },
+                                removeImage(index) {
+                                    const newDt = new DataTransfer();
+                                    for (let i = 0; i < this.dt.files.length; i++) {
+                                        if (i !== index) newDt.items.add(this.dt.files[i]);
+                                    }
+                                    this.dt = newDt;
+                                    this.imageUrls.splice(index, 1);
+                                    this.$refs.hiddenUploadInput.files = this.dt.files;
                                 }
                             }));
                         });
