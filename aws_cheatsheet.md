@@ -46,11 +46,18 @@ php artisan optimize:clear
 ```
 *(This one exact command automatically runs `route:clear`, `config:clear`, `cache:clear`, `view:clear`, and `event:clear` all at the exact same time!)*
 
-## 5. 🤖 The Background Worker (Supervisor) Commands
-If an automated email gets stuck, or if you completely change how the "Ticket Booked" email looks and you need to restart the background queue daemon so it reads the new code:
+## 5. 🤖 The Background Worker & Queue Commands
+**CRITICAL RULE:** Laravel queue workers load your application code into memory **once** when they start up. If you deploy new code (like fixing a bug in an email or changing a PDF), the worker will ignore your new changes and keep running the old cached code until you restart it!
+
+Always run this command after deploying new code that affects background jobs:
+```bash
+php artisan queue:restart                  # Safely tells the worker to reboot and read new code
+```
+
+If an automated email gets permanently stuck and you need to forcefully restart the Supervisor daemon managing the queues:
 ```bash
 sudo supervisorctl status                  # Check if the worker is "RUNNING"
-sudo supervisorctl restart eventpass-worker:*   # Kills and restarts the background queue
+sudo supervisorctl restart eventpass-worker:*   # Force kills and restarts the background queue
 ```
 
 ### 🕒 Initializing the Background Worker (One-Time Setup)
