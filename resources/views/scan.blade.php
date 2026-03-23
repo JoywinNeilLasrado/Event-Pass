@@ -41,7 +41,9 @@
         document.addEventListener('DOMContentLoaded', function () {
             function onScanSuccess(decodedText, decodedResult) {
                 if(decodedText.includes('tickets/verify')) {
-                    window.location.href = decodedText;
+                    if (confirm("🚨 DEBUG: The scanner found this exact URL hidden inside the QR Code:\n\n" + decodedText + "\n\nDo you want the browser to try and open it?")) {
+                        window.location.href = decodedText;
+                    }
                 } else {
                     alert("Invalid QR Code scanned. This is not a Passage ticket.");
                 }
