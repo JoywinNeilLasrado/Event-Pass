@@ -39,14 +39,6 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            
-            // Debug check for the user's browser
-            if (window.isSecureContext === false) {
-                alert("Browser Security Block: You must establish an HTTPS secure connection. Please type https:// before your domain in the URL bar.");
-            } else if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert("Browser Security Block: Camera access is disabled by this specific browser. Please open this link directly in standard Google Chrome (not inside WhatsApp/Instagram/Facebook).");
-            }
-
             function onScanSuccess(decodedText, decodedResult) {
                 if(decodedText.includes('tickets/verify')) {
                     window.location.href = decodedText;
@@ -55,16 +47,18 @@
                 }
             }
 
-            function onScanFailure(error) {
-                // Keep scanning
-            }
+            const html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-            let html5QrcodeScanner = new Html5QrcodeScanner(
-                "reader",
-                { fps: 10, qrbox: {width: 250, height: 250} },
-                /* verbose= */ false);
-                
-            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            // Attempt to force the rear camera directly
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+                .catch(err => {
+                    // Fallback to any available camera if rear camera fails
+                    html5QrCode.start({ facingMode: "user" }, config, onScanSuccess)
+                        .catch(err2 => {
+                            alert("Mobile Display Error: Could not render camera feed. " + err2);
+                        });
+                });
         });
     </script>
 </x-app-layout>
