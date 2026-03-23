@@ -40,10 +40,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             
+            // Debug check for the user's browser
+            if (window.isSecureContext === false) {
+                alert("Browser Security Block: You must establish an HTTPS secure connection. Please type https:// before your domain in the URL bar.");
+            } else if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Browser Security Block: Camera access is disabled by this specific browser. Please open this link directly in standard Google Chrome (not inside WhatsApp/Instagram/Facebook).");
+            }
+
             function onScanSuccess(decodedText, decodedResult) {
-                // We assume the QR code contains the full validation URL
                 if(decodedText.includes('tickets/verify')) {
-                    // Redirect to the verification URL to immediately display the valid/invalid ticket screen!
                     window.location.href = decodedText;
                 } else {
                     alert("Invalid QR Code scanned. This is not a Passage ticket.");
@@ -51,7 +56,7 @@
             }
 
             function onScanFailure(error) {
-                // handle scan failure, usually better to ignore and keep scanning
+                // Keep scanning
             }
 
             let html5QrcodeScanner = new Html5QrcodeScanner(
