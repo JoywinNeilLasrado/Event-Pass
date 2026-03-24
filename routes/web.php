@@ -120,12 +120,54 @@ Route::post('/tickets/checkin/{booking}', [BookingController::class, 'checkInTic
 
 
 
-// --- Developer Mail Preview Route ---
+// --- Developer Mail Preview Routes ---
 if (app()->environment('local')) {
-    Route::get('/preview-reminder', function () {
-        $event = Event::first();
-        $booking = App\Models\Booking::first();
-        return new App\Mail\EventReminder($event, $booking);
+    Route::get('/preview/emails', function () {
+        return '
+        <div style="font-family: -apple-system, system-ui; padding: 40px; max-width: 600px; margin: 0 auto;">
+            <h2 style="font-weight: 800; font-size: 28px;">Email Previews</h2>
+            <p>Click below to preview the new premium templates:</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px;">
+                <a href="/preview/email/ticket" style="padding: 12px 24px; background: #000; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;">Ticket Booked</a>
+                <a href="/preview/email/reminder" style="padding: 12px 24px; background: #000; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;">Event Reminder</a>
+                <a href="/preview/email/waitlist" style="padding: 12px 24px; background: #000; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;">Waitlist Available</a>
+                <a href="/preview/email/broadcast" style="padding: 12px 24px; background: #000; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;">Attendee Broadcast</a>
+            </div>
+        </div>
+        ';
+    });
+
+    Route::get('/preview/email/ticket', function () {
+        $booking = App\Models\Booking::with('event', 'user')->first();
+        if (!$booking) return "No bookings found to mock.";
+        return new App\Mail\TicketBooked($booking);
+    });
+
+    Route::get('/preview/email/reminder', function () {
+        $booking = App\Models\Booking::with('event', 'user')->first();
+        if (!$booking) return "No bookings found to mock.";
+        return new App\Mail\EventReminder($booking->event, $booking);
+    });
+
+    Route::get('/preview/email/waitlist', function () {
+        $event = App\Models\Event::first();
+        $user = App\Models\User::first();
+        if (!$event || !$user) return "No data to mock waitlist.";
+        $waitlist = new App\Models\Waitlist();
+        $waitlist->setRelation('event', $event);
+        $waitlist->setRelation('user', $user);
+        
+        $ticketType = new App\Models\TicketType();
+        $ticketType->name = 'VIP Access';
+        $waitlist->setRelation('ticketType', $ticketType);
+        
+        return new App\Mail\WaitlistAvailable($waitlist);
+    });
+
+    Route::get('/preview/email/broadcast', function () {
+        $event = App\Models\Event::with('user')->first();
+        if (!$event) return "No events found to mock.";
+        return new App\Mail\AttendeeBroadcast($event, "Important Update", "Hello attendees!\n\nThis is a preview broadcast message from the new premium template. We are incredibly excited to see you!\n\nBest,\nOrganizer");
     });
 }
 

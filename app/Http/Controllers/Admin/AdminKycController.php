@@ -8,13 +8,17 @@ use Illuminate\Http\Request;
 
 class AdminKycController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $users = User::where('kyc_status', 'pending')
+        $status = $request->query('status', 'pending');
+        
+        $users = User::whereNotNull('kyc_status')
+                     ->where('kyc_status', $status)
                      ->latest()
-                     ->paginate(20);
+                     ->paginate(20)
+                     ->withQueryString();
                      
-        return view('admin.kyc.index', compact('users'));
+        return view('admin.kyc.index', compact('users', 'status'));
     }
 
     public function approve(User $user)

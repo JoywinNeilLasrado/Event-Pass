@@ -41,7 +41,7 @@ class EventReminder extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.events.reminder',
+            view: 'emails.events.reminder',
             with: [
                 'event' => $this->event,
                 'booking' => $this->booking,

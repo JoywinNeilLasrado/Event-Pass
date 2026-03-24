@@ -2,10 +2,16 @@
     <x-slot name="title">KYC Approvals Queue</x-slot>
 
     <div class="card overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-100 dark:border-white/10 flex justify-between items-center transition-colors">
+        <div class="px-6 py-5 border-b border-gray-100 dark:border-white/10 flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-colors">
             <div class="flex items-center gap-3">
-                <h3 class="font-bold text-gray-900 dark:text-white tracking-tight transition-colors">Pending Organizer Applications</h3>
+                <h3 class="font-bold text-gray-900 dark:text-white tracking-tight transition-colors">Organizer Applications</h3>
                 <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[#222] border border-gray-200 dark:border-white/10 px-2 py-0.5 rounded-md shadow-sm transition-colors">{{ $users->total() }}</span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <a href="{{ route('admin.kyc.index', ['status' => 'pending']) }}" class="text-xs px-3 py-1.5 rounded-md font-semibold transition-colors {{ $status === 'pending' ? 'bg-[#111] dark:bg-white text-white dark:text-black' : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10' }}">Pending</a>
+                <a href="{{ route('admin.kyc.index', ['status' => 'approved']) }}" class="text-xs px-3 py-1.5 rounded-md font-semibold transition-colors {{ $status === 'approved' ? 'bg-[#111] dark:bg-white text-white dark:text-black' : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10' }}">Approved</a>
+                <a href="{{ route('admin.kyc.index', ['status' => 'rejected']) }}" class="text-xs px-3 py-1.5 rounded-md font-semibold transition-colors {{ $status === 'rejected' ? 'bg-[#111] dark:bg-white text-white dark:text-black' : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10' }}">Rejected</a>
             </div>
         </div>
         <div class="overflow-x-auto">
@@ -38,20 +44,32 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-3">
-                                    <form action="{{ route('admin.kyc.approve', $user) }}" method="POST" onsubmit="return confirm('Approve this firm as an Organizer?')">
-                                        @csrf
-                                        <button class="text-[11px] font-black text-green-600 dark:text-green-500 uppercase tracking-widest focus:outline-none hover:opacity-80 transition-opacity">Approve</button>
-                                    </form>
-                                    <form action="{{ route('admin.kyc.reject', $user) }}" method="POST" onsubmit="return confirm('Reject and lock out this application?')">
-                                        @csrf
-                                        <button class="text-[11px] font-black text-red-600 dark:text-red-500 uppercase tracking-widest focus:outline-none hover:opacity-80 transition-opacity">Reject</button>
-                                    </form>
+                                    @if($status === 'pending')
+                                        <form action="{{ route('admin.kyc.approve', $user) }}" method="POST" onsubmit="return confirm('Approve this firm as an Organizer?')">
+                                            @csrf
+                                            <button class="text-[11px] font-black text-green-600 dark:text-green-500 uppercase tracking-widest focus:outline-none hover:opacity-80 transition-opacity">Approve</button>
+                                        </form>
+                                        <form action="{{ route('admin.kyc.reject', $user) }}" method="POST" onsubmit="return confirm('Reject and lock out this application?')">
+                                            @csrf
+                                            <button class="text-[11px] font-black text-red-600 dark:text-red-500 uppercase tracking-widest focus:outline-none hover:opacity-80 transition-opacity">Reject</button>
+                                        </form>
+                                    @elseif($status === 'approved')
+                                        <form action="{{ route('admin.kyc.reject', $user) }}" method="POST" onsubmit="return confirm('Revoke Organizer access and downgrade to standard user?')">
+                                            @csrf
+                                            <button class="text-[11px] font-black text-red-600 dark:text-red-500 uppercase tracking-widest focus:outline-none hover:opacity-80 transition-opacity">Revoke Organizer</button>
+                                        </form>
+                                    @elseif($status === 'rejected')
+                                        <form action="{{ route('admin.kyc.approve', $user) }}" method="POST" onsubmit="return confirm('Approve this firm as an Organizer?')">
+                                            @csrf
+                                            <button class="text-[11px] font-black text-green-600 dark:text-green-500 uppercase tracking-widest focus:outline-none hover:opacity-80 transition-opacity">Re-Approve</button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 font-medium transition-colors">Great job! The approvals queue is completely empty.</td>
+                            <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 font-medium transition-colors">No {{ $status }} organizer applications found.</td>
                         </tr>
                     @endforelse
                 </tbody>

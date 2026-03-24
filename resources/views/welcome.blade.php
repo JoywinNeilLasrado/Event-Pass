@@ -15,6 +15,46 @@
             document.documentElement.classList.remove('dark');
         }
     </script>
+
+    <style>
+        /* Organic Blob Animation */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 15s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Hero Entrance Animation */
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in {
+            opacity: 0;
+            animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-\[500ms\] { animation-delay: 500ms; }
+
+        /* Scroll Reveal Utility */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 
 <body
@@ -65,14 +105,16 @@
     </header>
 
     <main class="flex-grow flex items-center justify-center pt-24 pb-16 px-6 relative z-10 mt-10">
-        <!-- Decorative glowing orbs behind the hero -->
-        <div
-            class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[800px] sm:h-[800px] bg-gradient-to-tr from-purple-500/20 to-blue-500/20 dark:from-purple-600/30 dark:to-blue-600/30 blur-[120px] rounded-full pointer-events-none -z-10">
+        <!-- Organic Animated Glowing Orbs -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[500px] sm:h-[700px] pointer-events-none -z-10 flex justify-center items-center opacity-30 dark:opacity-40 overflow-visible transition-opacity duration-300">
+            <div class="absolute w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] bg-purple-500 rounded-full blur-[100px] sm:blur-[120px] animate-blob"></div>
+            <div class="absolute w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-blue-500 rounded-full blur-[100px] sm:blur-[120px] animate-blob" style="animation-duration: 18s; animation-delay: -5s; transform: translateX(200px);"></div>
+            <div class="absolute w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-pink-500 rounded-full blur-[100px] sm:blur-[120px] animate-blob" style="animation-duration: 22s; animation-delay: -15s; transform: translateX(-200px);"></div>
         </div>
 
         <div class="max-w-5xl mx-auto text-center">
             <div
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-white/5 backdrop-blur-md border border-gray-200/50 dark:border-white/10 text-sm font-semibold mb-8 text-black dark:text-white shadow-sm transition-colors cursor-default hover:bg-white/80 dark:hover:bg-white/10">
+                class="animate-in delay-100 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 dark:bg-white/5 backdrop-blur-md border border-gray-200/50 dark:border-white/10 text-sm font-semibold mb-8 text-black dark:text-white shadow-sm transition-colors cursor-default hover:bg-white/80 dark:hover:bg-white/10">
                 <span class="relative flex h-3 w-3">
                     <span
                         class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -82,19 +124,19 @@
             </div>
 
             <h1
-                class="text-6xl sm:text-7xl md:text-8xl font-extrabold tracking-tighter text-[#111827] dark:text-white leading-[1.05] mb-8 transition-colors">
+                class="animate-in delay-200 text-6xl sm:text-7xl md:text-8xl font-extrabold tracking-tighter text-[#111827] dark:text-white leading-[1.05] mb-8 transition-colors">
                 Host, discover, and <br class="hidden sm:block" /> experience the
                 <span
                     class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">extraordinary.</span>
             </h1>
 
             <p
-                class="mt-8 text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-14 leading-relaxed font-light transition-colors">
+                class="animate-in delay-300 mt-8 text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-14 leading-relaxed font-light transition-colors">
                 The ultimate premium platform to create, manage, and book events effortlessly. Immerse yourself in a
                 world-class ticketing experience built for the modern creator.
             </p>
 
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 relative z-20 mb-16">
+            <div class="animate-in delay-400 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 relative z-20 mb-16">
                 @auth
                 @if(Auth::user()->is_organizer)
                 <a href="{{ route('events.create') }}"
@@ -120,7 +162,7 @@
             </div>
 
             <!-- Category Carousel -->
-            <div class="relative z-30 mb-8 w-screen relative -left-[50vw] ml-[50%]">
+            <div class="animate-in delay-[500ms] relative z-30 mb-8 w-screen relative -left-[50vw] ml-[50%]">
                 <x-category-carousel :categories="$categories" />
             </div>
 
@@ -139,7 +181,7 @@
                             clearInterval(this.timer);
                         }
                      }" x-init="startTimer()" @mouseenter="stopTimer()" @mouseleave="startTimer()">
-                <div class="flex items-center justify-between mb-8 px-4 sm:px-0 max-w-7xl mx-auto">
+                <div class="scroll-reveal flex items-center justify-between mb-8 px-4 sm:px-0 max-w-7xl mx-auto">
                     <div class="text-left">
                         <h2 class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight">
                             Featured Events</h2>
@@ -166,7 +208,7 @@
                     </div>
                 </div>
 
-                <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-0">
+                <div class="scroll-reveal relative w-full max-w-7xl mx-auto px-4 sm:px-0">
                     <div
                         class="overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl relative bg-gray-100 dark:bg-gray-900 aspect-[16/9] sm:aspect-[21/9]">
                         <div class="flex w-full h-full transition-transform duration-700 ease-in-out"
@@ -255,7 +297,7 @@
                     class="font-bold text-lg tracking-tight text-gray-900 dark:text-white transition-colors">Passage.</span>
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-400 font-medium transition-colors">
-                &copy; {{ date('Y') }} Passage. Built with Laravel and Tailwind CSS.
+                Created by Joywin Neil Lasrado with <span class="text-red-500 animate-pulse inline-block">❤️</span>
             </div>
         </div>
     </footer>
@@ -297,6 +339,22 @@
                     }
                 });
             }
+
+            // Scroll Reveal Observer
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { 
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            });
+
+            document.querySelectorAll('.scroll-reveal').forEach((el) => {
+                observer.observe(el);
+            });
         });
     </script>
 </body>

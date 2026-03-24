@@ -82,7 +82,7 @@
             
             <footer class="border-t border-white/20 dark:border-white/10 bg-white/30 dark:bg-black/30 backdrop-blur-xl py-12 mt-auto text-center text-sm text-gray-700 dark:text-gray-400">
                 <div class="max-w-7xl mx-auto px-6">
-                    &copy; {{ date('Y') }} Passage. Built with premium glassmorphism design.
+                    Created by Joywin Neil Lasrado with <span class="text-red-500 animate-pulse inline-block">❤️</span>
                 </div>
             </footer>
         </div>
