@@ -332,7 +332,7 @@
                                             <input type="text" :name="`tickets[${index}][name]`" x-model="pkg.name" required class="form-input-vercel px-4 py-2.5 text-sm" placeholder="e.g. VIP">
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5">Price ($)</label>
+                                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-1.5">Price (₹)</label>
                                             <input type="number" step="0.01" :name="`tickets[${index}][price]`" x-model="pkg.price" required class="form-input-vercel px-4 py-2.5 text-sm" placeholder="0.00 for Free">
                                         </div>
                                         <div>

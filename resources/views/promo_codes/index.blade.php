@@ -52,7 +52,7 @@
                                             @if($code->discount_type === 'percentage')
                                                 {{ $code->discount_amount }}% OFF
                                             @else
-                                                ${{ number_format($code->discount_amount, 2) }} OFF
+                                                ₹{{ number_format($code->discount_amount, 2) }} OFF
                                             @endif
                                         </td>
                                         <td class="px-6 py-4">

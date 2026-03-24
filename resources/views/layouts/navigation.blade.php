@@ -4,8 +4,8 @@
         <div class="px-5 sm:px-8">
             <div class="flex justify-between h-14 items-center">
             <div class="flex items-center gap-6 sm:gap-8">
-                <!-- Back to Welcome Page -->
-                <a href="{{ url('/') }}" class="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors" title="Back to Home">
+                <!-- Go Back -->
+                <a href="{{ url()->previous() }}" class="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 transition-colors" title="Go Back">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
                 </a>
 

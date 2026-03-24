@@ -49,14 +49,8 @@
 
                 @if (Route::has('login'))
                 @auth
-                @if(Auth::user()->is_organizer)
-                <a href="{{ url('/dashboard') }}"
-                    class="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">Dashboard</a>
-                @else
-                <a href="{{ route('bookings.index') }}"
-                    class="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">My
-                    Tickets</a>
-                @endif
+                <a href="{{ Auth::user()->is_organizer ? url('/dashboard') : route('bookings.index') }}"
+                    class="btn-vercel text-sm px-5 py-2">Let's Get Started</a>
                 @else
                 <a href="{{ route('login') }}"
                     class="text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">Log
@@ -84,7 +78,7 @@
                         class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                 </span>
-                Passage 2.0 is now live
+                Discover exclusive events near you
             </div>
 
             <h1
@@ -107,15 +101,13 @@
                     class="btn-vercel text-lg px-10 py-4 w-full sm:w-auto shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300">Create
                     an Event</a>
                 <a href="{{ route('dashboard') }}"
-                    class="btn-vercel-secondary text-lg px-10 py-4 w-full sm:w-auto bg-white/50 dark:bg-white/5 backdrop-blur-md border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-all duration-300 text-gray-900 dark:text-white">My
-                    Dashboard</a>
+                    class="btn-vercel-secondary text-lg px-10 py-4 w-full sm:w-auto bg-white/50 dark:bg-white/5 backdrop-blur-md border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-all duration-300 text-gray-900 dark:text-white">Let's Get Started</a>
                 @else
                 <a href="{{ route('events.index') }}"
                     class="btn-vercel text-lg px-10 py-4 w-full sm:w-auto shadow-xl shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300">Explore
                     Events</a>
                 <a href="{{ route('bookings.index') }}"
-                    class="btn-vercel-secondary text-lg px-10 py-4 w-full sm:w-auto bg-white/50 dark:bg-white/5 backdrop-blur-md border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-all duration-300 text-gray-900 dark:text-white">My
-                    Tickets</a>
+                    class="btn-vercel-secondary text-lg px-10 py-4 w-full sm:w-auto bg-white/50 dark:bg-white/5 backdrop-blur-md border-gray-200/50 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/15 transition-all duration-300 text-gray-900 dark:text-white">Let's Get Started</a>
                 @endif
                 @else
                 <a href="{{ route('register') }}"

@@ -40,17 +40,12 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'is_organizer' => $request->has('is_organizer'),
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        $redirect = Auth::user()->is_organizer 
-            ? route('dashboard', absolute: false) 
-            : route('events.index', absolute: false);
-
-        return redirect($redirect);
+        return redirect(route('events.index', absolute: false));
     }
 }
