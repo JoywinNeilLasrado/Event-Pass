@@ -61,6 +61,13 @@ class AuthController extends Controller
 
         $user = Auth::guard('api')->user();
 
+        if ($user->is_admin) {
+            Auth::guard('api')->logout();
+            return response()->json([
+                'message' => 'Admin accounts cannot be used on the mobile application.',
+            ], 403);
+        }
+
         return response()->json([
             'message' => 'Success!',
             'user' => $user,

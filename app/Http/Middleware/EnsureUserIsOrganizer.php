@@ -16,6 +16,10 @@ class EnsureUserIsOrganizer
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user() || ! $request->user()->is_organizer) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['error' => 'Organizer access required.'], 403);
+            }
+
             if ($request->user() && $request->user()->employer_id) {
                 return redirect()->route('scan');
             }

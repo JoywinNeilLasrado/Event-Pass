@@ -70,6 +70,17 @@ class DashboardController extends Controller
             ? round(($stats['total_attendees'] / $stats['total_views']) * 100, 2) 
             : 0;
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'myEvents' => $myEvents,
+                'myBookings' => $myBookings,
+                'stats' => $stats,
+                'chartLabels' => $chartLabels,
+                'chartData' => $chartData,
+                'conversionRate' => $conversionRate
+            ]);
+        }
+
         return view('dashboard', compact('myEvents', 'myBookings', 'stats', 'chartLabels', 'chartData', 'conversionRate'));
     }
 }

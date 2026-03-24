@@ -1,5 +1,5 @@
-<div class="sticky top-4 z-50 px-4 sm:px-6 w-full max-w-7xl mx-auto transition-all duration-300">
-    <nav x-data="{ open: false }" class="relative bg-white dark:bg-[#1a1a1a] shadow-[0_4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] rounded-full border border-gray-200/60 dark:border-white/10 transition-colors duration-300">
+<div x-data="{ open: false }" class="sticky top-4 z-50 px-4 sm:px-6 w-full max-w-7xl mx-auto transition-all duration-300">
+    <nav class="relative bg-white dark:bg-[#1a1a1a] shadow-[0_4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] rounded-full border border-gray-200/60 dark:border-white/10 transition-colors duration-300">
         <!-- Primary Navigation Menu -->
         <div class="px-5 sm:px-8">
             <div class="flex justify-between h-14 items-center">

@@ -16,6 +16,9 @@ class WaitlistController extends Controller
         $ticketType = $event->ticketTypes()->findOrFail($request->ticket_type_id);
 
         if ($ticketType->remaining > 0) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['error' => 'Tickets are currently available for this tier. You can book them directly.'], 400);
+            }
             return back()->with('error', 'Tickets are currently available for this tier. You can book them directly.');
         }
 
@@ -25,6 +28,9 @@ class WaitlistController extends Controller
             ->exists();
 
         if ($alreadyWaitlisted) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['error' => 'You are already on the waitlist for this ticket.'], 400);
+            }
             return back()->with('error', 'You are already on the waitlist for this ticket.');
         }
 
@@ -34,6 +40,9 @@ class WaitlistController extends Controller
             'status' => 'pending'
         ]);
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'You have successfully joined the waitlist! You will be automatically enrolled if a ticket becomes available.']);
+        }
         return back()->with('success', 'You have successfully joined the waitlist! You will be automatically enrolled if a ticket becomes available.');
     }
 }

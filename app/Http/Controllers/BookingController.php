@@ -24,6 +24,10 @@ class BookingController extends Controller
 
         $groupedBookings = $bookings->groupBy('event_id');
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['groupedBookings' => $groupedBookings]);
+        }
+
         return view('bookings.index', compact('groupedBookings'));
     }
 
@@ -47,14 +51,17 @@ class BookingController extends Controller
             $promoCode = $event->promoCodes()->where('code', $codeStr)->first();
 
             if (!$promoCode) {
+                if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Invalid promo code.'], 400);
                 return back()->with('error', 'Invalid promo code.');
             }
 
             if ($promoCode->expires_at && $promoCode->expires_at->isPast()) {
+                if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'This promo code has expired.'], 400);
                 return back()->with('error', 'This promo code has expired.');
             }
 
             if ($promoCode->max_uses && ($promoCode->uses + $quantity) > $promoCode->max_uses) {
+                if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'This promo code usage limit has been reached.'], 400);
                 return back()->with('error', 'This promo code usage limit has been reached.');
             }
 
@@ -99,6 +106,7 @@ class BookingController extends Controller
         });
 
         if (!$updated) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Sorry, tickets or promo code are no longer available for this event.'], 400);
             return back()->with('error', 'Sorry, tickets or promo code are no longer available for this event.');
         }
 
@@ -128,7 +136,7 @@ class BookingController extends Controller
                 ]
             ];
 
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()->withHeaders([
                 'x-client-id' => $appId,
                 'x-client-secret' => $secretKey,
                 'x-api-version' => '2023-08-01',
@@ -143,12 +151,21 @@ class BookingController extends Controller
                     $booking->update(['cashfree_order_id' => $cashfreeOrderId]);
                 }
                 
+                if ($request->expectsJson() || $request->is('api/*')) {
+                    return response()->json([
+                        'payment_session_id' => $paymentSessionId,
+                        'order_id' => $cashfreeOrderId,
+                        'env' => $env
+                    ]);
+                }
+                
                 return view('bookings.cashfree_checkout', [
                     'paymentSessionId' => $paymentSessionId,
                     'env' => $env
                 ]);
             }
 
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Payment gateway error: ' . $response->json('message', 'Unknown error')], 500);
             return back()->with('error', 'Payment gateway error: ' . $response->json('message', 'Unknown error'));
         }
 
@@ -157,9 +174,11 @@ class BookingController extends Controller
         }
 
         if ($promoCode) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['message' => "Promo code applied! $quantity Ticket(s) booked. 🎉", 'bookings' => $bookings]);
             return back()->with('success', "Promo code applied! $quantity Ticket(s) booked. 🎉");
         }
 
+        if ($request->expectsJson() || $request->is('api/*')) return response()->json(['message' => "$quantity Ticket(s) booked successfully! Enjoy the event! 🎉", 'bookings' => $bookings]);
         return back()->with('success', "$quantity Ticket(s) booked successfully! Enjoy the event! 🎉");
     }
 
@@ -172,12 +191,14 @@ class BookingController extends Controller
         $bookings = $event->bookings()->where('user_id', auth()->id())->get();
 
         if ($bookings->isEmpty()) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'You do not have a booking for this event.'], 400);
             return back()->with('error', 'You do not have a booking for this event.');
         }
 
         $cancelQuantity = $request->input('quantity', $bookings->count());
         
         if ($cancelQuantity > $bookings->count()) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'You cannot cancel more tickets than you own.'], 400);
             return back()->with('error', 'You cannot cancel more tickets than you own.');
         }
 
@@ -196,7 +217,7 @@ class BookingController extends Controller
                 $env = config('services.cashfree.env', 'sandbox');
                 $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
 
-                \Illuminate\Support\Facades\Http::withHeaders([
+                \Illuminate\Support\Facades\Http::withoutVerifying()->withHeaders([
                     'x-client-id' => $appId,
                     'x-client-secret' => $secretKey,
                     'x-api-version' => '2023-08-01',
@@ -207,6 +228,7 @@ class BookingController extends Controller
                     'refund_id' => 'REF_' . $bookingsToCancel->first()->id . '_' . time(),
                 ]);
             } catch (\Exception $e) {
+                if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Failed to process refund automatically. Please contact support. Error: ' . $e->getMessage()], 500);
                 return back()->with('error', 'Failed to process refund automatically. Please contact support. Error: ' . $e->getMessage());
             }
         }
@@ -230,6 +252,7 @@ class BookingController extends Controller
             $waitlistedUser->update(['status' => 'notified']);
         }
 
+        if ($request->expectsJson() || $request->is('api/*')) return response()->json(['message' => "Your {$freedSpots} ticket(s) have been cancelled and seats returned. 🔓"]);
         return back()->with('success', "Your {$freedSpots} ticket(s) have been cancelled and seats returned. 🔓");
     }
 
@@ -238,6 +261,7 @@ class BookingController extends Controller
         $bookings = $event->bookings()->where('user_id', auth()->id())->get();
 
         if ($bookings->isEmpty()) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'You do not have a booking for this event.'], 400);
             return back()->with('error', 'You do not have a booking for this event.');
         }
 
@@ -249,6 +273,11 @@ class BookingController extends Controller
 
         $pdf = Pdf::loadView('bookings.ticket', compact('bookings', 'event'));
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'download_url' => route('bookings.ticket', $event->id)
+            ]);
+        }
         return $pdf->stream('Passage-Tickets-' . $event->id . '.pdf');
     }
 
@@ -258,6 +287,7 @@ class BookingController extends Controller
 
         // Force Login if scanning
         if (!auth()->check()) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Unauthorized'], 401);
             return redirect()->guest(route('login'));
         }
 
@@ -265,11 +295,15 @@ class BookingController extends Controller
         $isStaff = auth()->user()->employer_id === $event->user_id;
 
         if (!$isCreator && !$isStaff) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Security Violation: Only the registered event organizer or authorized staff can scan and verify tickets for this event.'], 403);
             abort(403, 'Security Violation: Only the registered event organizer or authorized staff can scan and verify tickets for this event.');
         }
 
         $isOwner = true;
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['booking' => $booking, 'event' => $event, 'isOwner' => $isOwner]);
+        }
         return view('bookings.verify', compact('booking', 'event', 'isOwner'));
     }
 
@@ -278,6 +312,7 @@ class BookingController extends Controller
         $event = $booking->event;
 
         if (!auth()->check()) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Unauthorized action. Please login first.'], 401);
             abort(403, 'Unauthorized action. Please login first.');
         }
 
@@ -285,15 +320,18 @@ class BookingController extends Controller
         $isStaff = auth()->user()->employer_id === $event->user_id;
 
         if (!$isCreator && !$isStaff) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Unauthorized action. Only the event creator or verified staff can check in attendees.'], 403);
             abort(403, 'Unauthorized action. Only the event creator or verified staff can check in attendees.');
         }
 
         if ($booking->is_checked_in) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'This ticket has already been checked in!'], 400);
             return back()->with('error', 'This ticket has already been checked in!');
         }
 
         $booking->update(['is_checked_in' => true]);
 
+        if ($request->expectsJson() || $request->is('api/*')) return response()->json(['message' => 'Attendee successfully checked in! ✅']);
         return back()->with('success', 'Attendee successfully checked in! ✅');
     }
 }

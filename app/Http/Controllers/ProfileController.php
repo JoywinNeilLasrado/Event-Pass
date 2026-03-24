@@ -12,8 +12,11 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function edit(Request $request): View
+    public function edit(Request $request)
     {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['user' => $request->user()]);
+        }
         return view('profile.edit', [
             'user' => $request->user(),
         ]);
@@ -46,6 +49,9 @@ class ProfileController extends Controller
 
         $user->save();
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'Profile updated successfully', 'user' => $user]);
+        }
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
@@ -64,6 +70,9 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'Account deleted successfully']);
+        }
         return Redirect::to('/');
     }
 }

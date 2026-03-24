@@ -118,11 +118,7 @@ Route::middleware(['auth', 'organizer'])->group(function () {
 Route::get('/tickets/verify/{booking}', [BookingController::class, 'verifyTicket'])->name('tickets.verify')->middleware('signed');
 Route::post('/tickets/checkin/{booking}', [BookingController::class, 'checkInTicket'])->name('tickets.checkin')->middleware('auth');
 
-// --- API Resource Route ---
-Route::middleware('auth')->get('/api/events', function () {
-    $events = Event::with(['category', 'user', 'tags'])->paginate(15);
-    return EventResource::collection($events);
-})->name('api.events');
+
 
 // --- Developer Mail Preview Route ---
 if (app()->environment('local')) {

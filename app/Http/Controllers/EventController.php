@@ -16,7 +16,14 @@ class EventController extends Controller
     {
         $query = Event::with(['category', 'user', 'tags', 'ticketTypes', 'bookings'])
             ->where('is_published', true)
-            ->latest();
+            ->where(function ($q) {
+                $q->where('date', '>', now()->toDateString())
+                  ->orWhere(function ($q2) {
+                      $q2->where('date', '=', now()->toDateString())
+                         ->where('time', '>=', now()->toTimeString());
+                  });
+            })
+            ->latest('date');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -39,6 +46,14 @@ class EventController extends Controller
 
         $events = $query->paginate(9)->withQueryString();
         $categories = Category::all();
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'events' => $events,
+                'categories' => $categories,
+                'myEvents' => $myEvents
+            ]);
+        }
 
         return view('events.index', compact('events', 'categories', 'myEvents'));
     }
@@ -125,23 +140,44 @@ class EventController extends Controller
 
             if ($response->successful()) {
                 $event->update(['cashfree_order_id' => $cashfreeOrderId]);
+                
+                if ($request->expectsJson() || $request->is('api/*')) {
+                    return response()->json([
+                        'message' => 'Payment required to publish event',
+                        'payment_session_id' => $response->json('payment_session_id'),
+                        'order_id' => $cashfreeOrderId,
+                        'env' => $env,
+                        'event' => $event
+                    ], 201);
+                }
+
                 return view('bookings.cashfree_checkout', [
                     'paymentSessionId' => $response->json('payment_session_id'),
                     'env' => $env
                 ]);
             }
 
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['error' => 'Event created but failed to initialize publishing payment.'], 500);
+            }
             return redirect()->route('events.show', $event)
                 ->with('error', 'Event created but failed to initialize publishing payment.');
+        }
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'Event created successfully!', 'event' => $event], 201);
         }
 
         return redirect()->route('events.show', $event)
             ->with('success', 'Event created successfully!');
     }
 
-    public function show(Event $event)
+    public function show(Request $request, Event $event)
     {
         if (!$event->is_published && (!auth()->check() || auth()->id() !== $event->user_id)) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['error' => 'Event not found or not published.'], 404);
+            }
             abort(404, 'Event not found or not published.');
         }
 
@@ -156,6 +192,14 @@ class EventController extends Controller
         $userWaitlistTiers = auth()->check()
             ? auth()->user()->waitlists()->where('event_id', $event->id)->pluck('ticket_type_id')->toArray()
             : [];
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'event' => $event,
+                'hasBooked' => $hasBooked,
+                'userWaitlistTiers' => $userWaitlistTiers
+            ]);
+        }
 
         return view('events.show', compact('event', 'hasBooked', 'userWaitlistTiers'));
     }
@@ -185,6 +229,9 @@ class EventController extends Controller
         $bookings = $query->latest()->get();
         $event->setRelation('bookings', $bookings); // Override relation with filtered data
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['event' => $event]);
+        }
         return view('events.attendees', compact('event'));
     }
 
@@ -198,6 +245,9 @@ class EventController extends Controller
         $attendees = $event->bookings()->with('user')->get()->pluck('user')->unique('id');
 
         if ($attendees->isEmpty()) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['error' => 'There are no attendees to message yet.'], 400);
+            }
             return back()->with('error', 'There are no attendees to message yet.');
         }
 
@@ -209,7 +259,11 @@ class EventController extends Controller
             ));
         }
 
-        return back()->with('success', 'Blast Message dispatched unconditionally to all ' . $attendees->count() . ' verified unique attendees! 🚀');
+        $msg = 'Blast Message dispatched unconditionally to all ' . $attendees->count() . ' verified unique attendees! 🚀';
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => $msg]);
+        }
+        return back()->with('success', $msg);
     }
 
     public function update(UpdateEventRequest $request, Event $event)
@@ -268,11 +322,14 @@ class EventController extends Controller
             }
         }
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'Event updated successfully!', 'event' => $event]);
+        }
         return redirect()->route('events.show', $event)
             ->with('success', 'Event updated successfully!');
     }
 
-    public function destroy(Event $event)
+    public function destroy(Request $request, Event $event)
     {
         // Issue refunds to all attendees before soft deleting
         $bookings = $event->bookings()->where('payment_status', 'paid')->whereNotNull('cashfree_order_id')->get();
@@ -307,8 +364,12 @@ class EventController extends Controller
 
         $event->delete(); // SoftDelete
 
+        $msg = 'Event definitively canceled! All original tickets have been fully refunded via Cashfree.';
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => $msg]);
+        }
         return redirect()->route('events.index')
-            ->with('success', 'Event definitively canceled! All original tickets have been fully refunded via Cashfree.');
+            ->with('success', $msg);
     }
 
     public function exportAttendees(Event $event)
@@ -341,9 +402,12 @@ class EventController extends Controller
             ->header('Content-Disposition', 'attachment; filename="attendees_event_' . $event->id . '.csv"');
     }
 
-    public function retryPublishPayment(Event $event)
+    public function retryPublishPayment(Request $request, Event $event)
     {
         if ($event->is_published || $event->payment_status === 'paid' || auth()->id() !== $event->user_id) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['error' => 'Not applicable'], 400);
+            }
             return redirect()->route('dashboard');
         }
 
@@ -361,6 +425,12 @@ class EventController extends Controller
             ])->get($baseUrl . '/orders/' . $event->cashfree_order_id);
 
             if ($response->successful() && $response->json('order_status') === 'ACTIVE') {
+                if ($request->expectsJson() || $request->is('api/*')) {
+                    return response()->json([
+                        'payment_session_id' => $response->json('payment_session_id'),
+                        'env' => $env
+                    ]);
+                }
                 return view('bookings.cashfree_checkout', [
                     'paymentSessionId' => $response->json('payment_session_id'),
                     'env' => $env
@@ -398,12 +468,22 @@ class EventController extends Controller
 
         if ($newResponse->successful()) {
             $event->update(['cashfree_order_id' => $cashfreeOrderId]);
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'payment_session_id' => $newResponse->json('payment_session_id'),
+                    'order_id' => $cashfreeOrderId,
+                    'env' => $env
+                ]);
+            }
             return view('bookings.cashfree_checkout', [
                 'paymentSessionId' => $newResponse->json('payment_session_id'),
                 'env' => $env
             ]);
         }
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['error' => 'Unable to initialize checkout. Please try again.'], 500);
+        }
         return redirect()->route('dashboard')->with('error', 'Unable to initialize checkout. Please try again.');
     }
 }
