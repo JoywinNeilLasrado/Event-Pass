@@ -56,7 +56,7 @@
                                 <div class="label">Amount Paid</div>
                                 <div class="value" style="font-size: 16px;">
                                     @if($booking->amount_paid > 0)
-                                        ₹{{ number_format($booking->amount_paid, 2) }}
+                                        <span style="font-family: 'DejaVu Sans', sans-serif;">₹</span>{{ number_format($booking->amount_paid, 2) }}
                                     @elseif($booking->ticketType && $booking->ticketType->price > 0 && $booking->amount_paid == 0)
                                         100% Promo Code OFF
                                     @else
