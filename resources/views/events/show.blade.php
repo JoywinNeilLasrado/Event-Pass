@@ -291,11 +291,11 @@
                                                 <div class="text-right flex-shrink-0 ml-4">
                                                     <div class="font-extrabold text-2xl text-gray-900 dark:text-white tracking-tight relative">
                                                         {{-- Default price - always visible, no Alpine dependency --}}
-                                                        <span :class="{ 'line-through text-sm text-gray-400 font-medium': isValid && {{ $tier->price }} > 0 }">{{ $tier->price > 0 ? '$' . number_format($tier->price, 2) : 'FREE' }}</span>
+                                                        <span :class="{ 'line-through text-sm text-gray-400 font-medium': isValid && {{ $tier->price }} > 0 }">{{ $tier->price > 0 ? '₹' . number_format($tier->price, 2) : 'FREE' }}</span>
                                                         {{-- Discounted price - only shows after valid promo --}}
                                                         @if($tier->price > 0)
                                                         <div x-show="isValid" x-cloak class="text-green-500 dark:text-green-400">
-                                                            $<span x-text="calculatePrice({{ $tier->price }})"></span>
+                                                            ₹<span x-text="calculatePrice({{ $tier->price }})"></span>
                                                         </div>
                                                         @endif
                                                     </div>

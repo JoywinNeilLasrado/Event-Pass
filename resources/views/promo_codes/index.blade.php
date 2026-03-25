@@ -96,7 +96,7 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
                                 <select name="discount_type" class="form-input w-full bg-white dark:bg-[#0A0A0A] border-gray-300 dark:border-white/10 text-gray-900 dark:text-white rounded-lg focus:ring-purple-500 focus:border-purple-500">
                                     <option value="percentage">% Percentage</option>
-                                    <option value="fixed">$ Fixed Amount</option>
+                                    <option value="fixed">₹ Fixed Amount</option>
                                 </select>
                             </div>
                         </div>
