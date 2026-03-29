@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ class Event extends Model
 {
     use SoftDeletes;
     
-    protected $appends = ['remaining'];
+    protected $appends = ['remaining', 'poster_image_url'];
 
     protected $fillable = [
         'user_id',
@@ -77,5 +78,11 @@ class Event extends Model
     public function waitlists(): HasMany
     {
         return $this->hasMany(Waitlist::class);
+    public function getPosterImageUrlAttribute()
+    {
+        if (!$this->poster_image) {
+            return 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&q=80&w=800';
+        }
+        return url(Storage::url($this->poster_image));
     }
 }
