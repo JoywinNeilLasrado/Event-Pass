@@ -78,6 +78,7 @@ class Event extends Model
     public function waitlists(): HasMany
     {
         return $this->hasMany(Waitlist::class);
+    }
     public function getPosterImageUrlAttribute()
     {
         if (!$this->poster_image) {
