@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Event extends Model
 {
     use SoftDeletes;
+    
+    protected $appends = ['remaining'];
 
     protected $fillable = [
         'user_id',

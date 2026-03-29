@@ -25,8 +25,17 @@ class ScannerController extends Controller
             ], 403);
         }
 
-        // Assuming the QR code text is exactly the Booking ID
-        $bookingId = $request->input('qr_data');
+        // The QR code data can be either a numeric Booking ID (from the app)
+        // or a full verification URL (from the Email PDF).
+        $qrData = $request->input('qr_data');
+        $bookingId = $qrData;
+
+        // If qr_data is a URL, we extract the numeric ID from the end of the path
+        if (filter_var($qrData, FILTER_VALIDATE_URL)) {
+            $path = parse_url($qrData, PHP_URL_PATH);
+            $parts = explode('/', rtrim($path, '/'));
+            $bookingId = end($parts);
+        }
 
         $booking = Booking::with('user', 'event')->find($bookingId);
 

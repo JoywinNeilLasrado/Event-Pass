@@ -7,6 +7,16 @@ use Illuminate\Http\Request;
 
 class WaitlistController extends Controller
 {
+    public function index(Request $request)
+    {
+        $waitlists = auth()->user()->waitlists()->with(['event.category', 'ticketType'])->latest()->get();
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['waitlists' => $waitlists]);
+        }
+        return view('waitlist.index', compact('waitlists'));
+    }
+
     public function store(Request $request, Event $event)
     {
         $request->validate([

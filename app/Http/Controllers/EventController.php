@@ -34,7 +34,14 @@ class EventController extends Controller
         }
 
         if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
+            $cat = $request->category;
+            if (is_numeric($cat)) {
+                $query->where('category_id', $cat);
+            } else {
+                $query->whereHas('category', function($q) use ($cat) {
+                    $q->where('name', 'like', strtolower($cat));
+                });
+            }
         }
 
         $myEvents = collect();
@@ -257,6 +264,15 @@ class EventController extends Controller
                 $request->subject,
                 $request->message
             ));
+
+            // Save to Notification table
+            \App\Models\Notification::create([
+                'user_id' => $attendee->id,
+                'event_id' => $event->id,
+                'title' => $request->subject,
+                'message' => $request->message,
+                'type' => 'broadcast',
+            ]);
         }
 
         $msg = 'Blast Message dispatched unconditionally to all ' . $attendees->count() . ' verified unique attendees! 🚀';

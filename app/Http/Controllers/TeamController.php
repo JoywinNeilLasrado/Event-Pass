@@ -9,6 +9,17 @@ use Illuminate\Support\Str;
 
 class TeamController extends Controller
 {
+    public function index(Request $request)
+    {
+        $staff = User::where('employer_id', auth()->id())->get();
+        
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['staff' => $staff]);
+        }
+        
+        return view('team.index', compact('staff'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([

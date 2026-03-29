@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class TicketType extends Model
 {
+    protected $appends = ['remaining'];
+
     protected $fillable = [
         'event_id',
         'name',

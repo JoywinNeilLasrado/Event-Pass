@@ -91,6 +91,23 @@ class AuthController extends Controller
     }
 
     /**
+     * Mobile Forgot Password Request
+     */
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+        
+        $user = User::where('email', $request->email)->first();
+        
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        // Simulate sending email (in a real app, use Mail::send)
+        return response()->json(['message' => 'Password reset link sent to your email.']);
+    }
+
+    /**
      * Get Current User Profile
      */
     public function user()

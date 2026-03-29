@@ -26,6 +26,7 @@ use App\Http\Controllers\KycController;
 // Public Authentication Endpoints
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
 // Public Featured Events (Mirror of GET /)
 Route::get('/featured-events', function (Request $request) {
@@ -72,6 +73,7 @@ Route::middleware('auth:api')->group(function () {
 
     // Organizer / Team / Staff Management
     Route::middleware('organizer')->group(function () {
+        Route::get('/team', [TeamController::class, 'index']);
         Route::post('/team/staff', [TeamController::class, 'store']);
         Route::delete('/team/staff/{staff}', [TeamController::class, 'destroy']);
         
@@ -100,6 +102,7 @@ Route::middleware('auth:api')->group(function () {
 
     // Bookings & Attendee Actions
     Route::get('/my-tickets', [BookingController::class, 'index']);
+    Route::get('/my-waitlist', [WaitlistController::class, 'index']);
     Route::post('/events/{event}/book', [BookingController::class, 'store'])->middleware('throttle:10,1');
     Route::delete('/events/{event}/cancel', [BookingController::class, 'destroy']);
     Route::post('/events/{event}/waitlist', [WaitlistController::class, 'store'])->middleware('throttle:10,1');
@@ -117,4 +120,9 @@ Route::middleware('auth:api')->group(function () {
     // KYC
     Route::get('/kyc/setup', [KycController::class, 'setup']);
     Route::post('/kyc/submit', [KycController::class, 'submit']);
+
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+    Route::post('/notifications/{notification}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
 });
