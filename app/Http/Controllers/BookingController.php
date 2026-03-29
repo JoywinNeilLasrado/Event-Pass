@@ -334,4 +334,60 @@ class BookingController extends Controller
         if ($request->expectsJson() || $request->is('api/*')) return response()->json(['message' => 'Attendee successfully checked in! ✅']);
         return back()->with('success', 'Attendee successfully checked in! ✅');
     }
+
+    public function payPending(Request $request, Booking $booking)
+    {
+        if ($booking->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if ($booking->payment_status !== 'pending') {
+            return response()->json(['error' => 'This booking is not in pending status.'], 400);
+        }
+
+        $appId = config('services.cashfree.app_id');
+        $secretKey = config('services.cashfree.secret_key');
+        $env = config('services.cashfree.env', 'sandbox');
+        $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
+
+        // Generate a new unique order ID for this retry attempt
+        $cashfreeOrderId = 'RETRY_' . $booking->id . '_' . time();
+
+        $orderPayload = [
+            'order_amount' => round($booking->amount_paid, 2),
+            'order_currency' => 'INR',
+            'order_id' => $cashfreeOrderId,
+            'customer_details' => [
+                'customer_id' => (string) auth()->id(),
+                'customer_name' => auth()->user()->name,
+                'customer_email' => auth()->user()->email,
+                'customer_phone' => auth()->user()->phone ?? '9999999999',
+            ],
+            'order_meta' => [
+                'return_url' => route('payment.success') . '?order_id={order_id}',
+                'notify_url' => route('cashfree.webhook'),
+            ]
+        ];
+
+        $response = \Illuminate\Support\Facades\Http::withoutVerifying()->withHeaders([
+            'x-client-id' => $appId,
+            'x-client-secret' => $secretKey,
+            'x-api-version' => '2023-08-01',
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ])->post($baseUrl . '/orders', $orderPayload);
+
+        if ($response->successful()) {
+            $paymentSessionId = $response->json('payment_session_id');
+            $booking->update(['cashfree_order_id' => $cashfreeOrderId]);
+
+            return response()->json([
+                'payment_session_id' => $paymentSessionId,
+                'order_id' => $cashfreeOrderId,
+                'env' => $env
+            ]);
+        }
+
+        return response()->json(['error' => 'Payment gateway error: ' . $response->json('message', 'Unknown error')], 500);
+    }
 }

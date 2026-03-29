@@ -104,6 +104,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/my-tickets', [BookingController::class, 'index']);
     Route::get('/my-waitlist', [WaitlistController::class, 'index']);
     Route::post('/events/{event}/book', [BookingController::class, 'store'])->middleware('throttle:10,1');
+    Route::post('/bookings/{booking}/pay', [BookingController::class, 'payPending']);
     Route::delete('/events/{event}/cancel', [BookingController::class, 'destroy']);
     Route::post('/events/{event}/waitlist', [WaitlistController::class, 'store'])->middleware('throttle:10,1');
     Route::get('/events/{event}/ticket', [BookingController::class, 'downloadTicket']);
