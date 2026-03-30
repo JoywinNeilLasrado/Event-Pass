@@ -13,7 +13,7 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
     
-    protected $appends = ['is_organizer', 'profile_picture_url'];
+    protected $appends = ['profile_picture_url'];
 
     protected $fillable = ['name', 'email', 'password', 'bio', 'profile_picture', 'is_admin', 'is_organizer', 'has_unlimited_events', 'cashfree_vendor_id', 'employer_id', 'kyc_status', 'business_details', 'social_links'];
 
@@ -21,6 +21,7 @@ class User extends Authenticatable implements JWTSubject
 
     protected $casts = [
         'is_admin' => 'boolean',
+        'is_organizer' => 'boolean',
     ];
 
     protected function casts(): array
@@ -40,7 +41,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getIsOrganizerAttribute($value)
     {
-        return $this->is_admin || (bool) $value;
+        return $this->is_admin || (bool) ($value ?? $this->attributes['is_organizer'] ?? false);
     }
 
     public function events(): HasMany
