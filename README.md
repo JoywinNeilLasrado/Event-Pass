@@ -2,8 +2,6 @@
 
 A comprehensive, robust event management system built with **Laravel 10+ / 13**, **PHP 8.4**, **MySQL**, and **Tailwind CSS**. **Passage** allows users to discover, create, update, and securely book tickets for events. It features a complete administrative backend, role-based access control, file uploads, and transactional integrity for ticket bookings.
 
-> **Note:** This repository includes the complete web backend and frontend. The mobile app (`event_pass_app`) is maintained separately and communicates via the built-in JSON API resources.
-
 ---
 
 ## ✨ Key Features
@@ -22,8 +20,9 @@ A comprehensive, robust event management system built with **Laravel 10+ / 13**,
 
 - **Backend**: Laravel 13, PHP 8.4
 - **Frontend**: Laravel Blade, Tailwind CSS
+- **Mobile**: Flutter, Dart
 - **Database**: MySQL (Eloquent ORM)
-- **Authentication**: Laravel Breeze / Application Auth
+- **Authentication**: Laravel Breeze / Application Auth / Sanctum (for API)
 
 ---
 
@@ -69,6 +68,38 @@ composer run dev
 ```
 
 Visit the application at `http://localhost:8000` or your configured local URL.
+
+---
+
+## 📱 Mobile Application (EventPass)
+
+The mobile application is built with **Flutter** and serves as a scanner and event discovery tool.
+
+### Features
+- **🔍 Event Discovery**: Browse all active events on the platform.
+- **🚀 Ticket Scanning**: Admins and event owners can scan ticket QR codes (built-in scanner).
+- **💳 Secure Booking**: Seamless integration with the web backend for ticket reservations.
+- **🌙 Dark/Light Mode**: Full theme support for a premium user experience.
+
+### Flutter Setup
+
+1. **Navigate to the app directory**:
+   ```bash
+   cd event_pass_app
+   ```
+
+2. **Install Flutter dependencies**:
+   ```bash
+   flutter pub get
+   ```
+
+3. **Configure API Endpoint**:
+   Update the `lib/services/api_service.dart` file (or your configuration file) to point to your local or hosted Laravel API URL.
+
+4. **Run the application**:
+   ```bash
+   flutter run
+   ```
 
 ---
 
