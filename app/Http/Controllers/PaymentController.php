@@ -13,6 +13,7 @@ class PaymentController extends Controller
     {
         $order_id = $request->input('order_id');
         if (!$order_id) {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Invalid payment session.'], 400);
             return redirect()->route('events.index')->with('error', 'Invalid payment session.');
         }
 
@@ -21,7 +22,7 @@ class PaymentController extends Controller
         $env = config('services.cashfree.env', 'sandbox');
         $baseUrl = $env === 'sandbox' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg';
 
-        $response = \Illuminate\Support\Facades\Http::withHeaders([
+        $response = \Illuminate\Support\Facades\Http::withoutVerifying()->withHeaders([
             'x-client-id' => $appId,
             'x-client-secret' => $secretKey,
             'x-api-version' => '2023-08-01',
@@ -29,6 +30,7 @@ class PaymentController extends Controller
         ])->get($baseUrl . '/orders/' . $order_id);
 
         if (!$response->successful() || $response->json('order_status') !== 'PAID') {
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['error' => 'Payment was not successful or is currently pending.'], 400);
             return redirect()->route('events.index')->with('error', 'Payment was not successful or is currently pending.');
         }
 
@@ -41,18 +43,21 @@ class PaymentController extends Controller
                     'is_organizer' => true,
                     'has_unlimited_events' => true
                 ]);
+                if ($request->expectsJson() || $request->is('api/*')) return response()->json(['message' => 'Account upgraded successfully.']);
                 return redirect()->route('dashboard')->with('success', 'Welcome back! Your Pro Organizer account has been reactivated.');
             } else if ($user) {
                 $user->update([
                     'kyc_status' => 'pending_submission',
                     'has_unlimited_events' => true
                 ]);
+                if ($request->expectsJson() || $request->is('api/*')) return response()->json(['message' => 'Pro payment successful! Complete KYC.']);
                 return redirect()->route('kyc.setup')->with('success', 'Pro payment successful! Please complete your organizer verification to activate your account.');
             }
         } elseif (str_starts_with($order_id, 'EVENT_')) {
             $parts = explode('_', $order_id);
             $eventId = $parts[1];
             \App\Models\Event::where('id', $eventId)->update(['is_published' => true, 'payment_status' => 'paid']);
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['message' => 'Event published successfully!']);
             return redirect()->route('dashboard')->with('success', 'Your event has been published successfully! 🎉');
         } else {
             // Ticket Booking
@@ -63,6 +68,7 @@ class PaymentController extends Controller
                     Mail::to($booking->user->email)->send(new TicketBooked($booking));
                 }
             }
+            if ($request->expectsJson() || $request->is('api/*')) return response()->json(['message' => 'Payment successful!']);
             return redirect()->route('bookings.index')->with('success', 'Payment successful! Your tickets have been booked! 🎉');
         }
     }

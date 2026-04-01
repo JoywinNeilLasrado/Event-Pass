@@ -24,11 +24,17 @@ class UpgradeController extends Controller
                 'is_organizer' => true,
                 'has_unlimited_events' => false
             ]);
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Welcome back! Your organizer account has been reactivated.', 'is_organizer' => true]);
+            }
             return redirect()->route('dashboard')->with('success', 'Welcome back! Your organizer account has been reactivated.');
         }
 
         // Prevent rejected applications from bypassing the queue
         if ($user->kyc_status === 'rejected') {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['error' => 'Your organizer application was previously rejected by an administrator. Please contact support to appeal.'], 403);
+            }
             return redirect()->route('dashboard')->with('error', 'Your organizer application was previously rejected by an administrator. Please contact support to appeal.');
         }
 
@@ -38,6 +44,12 @@ class UpgradeController extends Controller
             'has_unlimited_events' => false
         ]);
         
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'message' => 'Plan selected! Please complete your organizer verification.',
+                'kyc_status' => 'pending_submission'
+            ]);
+        }
         return redirect()->route('kyc.setup')->with('success', 'Plan selected! Please complete your organizer verification to gain Dashboard access.');
     }
 
@@ -77,12 +89,22 @@ class UpgradeController extends Controller
         ])->post($baseUrl . '/orders', $orderPayload);
 
         if ($response->successful()) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'paymentSessionId' => $response->json('payment_session_id'),
+                    'orderId' => $cashfreeOrderId,
+                    'env' => $env
+                ]);
+            }
             return view('bookings.cashfree_checkout', [
                 'paymentSessionId' => $response->json('payment_session_id'),
                 'env' => $env
             ]);
         }
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['error' => 'Failed to initialize upgrade payment.'], 500);
+        }
         return back()->with('error', 'Failed to initialize upgrade payment.');
     }
 
@@ -94,6 +116,9 @@ class UpgradeController extends Controller
             'has_unlimited_events' => false
         ]);
         
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'Organizer role cancelled successfully.']);
+        }
         return redirect()->route('profile.edit')->with('status', 'plan-canceled');
     }
 }

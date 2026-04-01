@@ -1,58 +1,100 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🎟️ Passage
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive, robust event management system built with **Laravel 10+ / 13**, **PHP 8.4**, **MySQL**, and **Tailwind CSS**. **Passage** allows users to discover, create, update, and securely book tickets for events. It features a complete administrative backend, role-based access control, file uploads, and transactional integrity for ticket bookings.
 
-## About Laravel
+> **Note:** This repository includes the complete web backend and frontend. The mobile app (`event_pass_app`) is maintained separately and communicates via the built-in JSON API resources.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **🎫 Event Management**: Full CRUD capabilities for events. Users can create, edit, view, and (soft) delete their own events.
+- **🔒 Secure Ticket Booking**: Implements database row-level locking (`lockForUpdate()`) within transactions to precisely manage `available_tickets` and prevent race conditions (overselling).
+- **🛡️ Role-Based Access Control (RBAC)**: Secure middleware (`EnsureUserOwnsEvent`, `EnsureUserIsAdmin`) restricts editing capabilities to event owners and administrative actions to admins.
+- **👨‍💼 Admin Dashboard**: A comprehensive admin panel to view platform statistics, enforce moderation by force-purging or restoring soft-deleted events, manage categories/tags, and manage user roles.
+- **🖼️ Media Uploads**: Integrated local storage for user profile pictures and event poster images.
+- **🏷️ Categorization & Tags**: Organize events dynamically using database-driven categories and many-to-many tag relationships.
+- **🔌 API Ready**: Equipped with `EventResource` JSON transformers, making it fully ready to serve data to mobile clients.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🛠️ Tech Stack
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Backend**: Laravel 13, PHP 8.4
+- **Frontend**: Laravel Blade, Tailwind CSS
+- **Database**: MySQL (Eloquent ORM)
+- **Authentication**: Laravel Breeze / Application Auth
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## 🚀 Getting Started
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+
+### Prerequisites
+
+Ensure you have the following installed on your local machine:
+- **PHP** >= 8.3
+- **Composer**
+- **Node.js** & **npm**
+- **MySQL** Database
+
+### Installation
+
+1. **Clone the repository** (if you haven't already):
+   ```bash
+   git clone <repository-url>
+   cd Passage
+   ```
+
+2. **Run the Setup Script**:
+   We have configured a handy composer script that installs all dependencies, generates the `.env` file, generates the application key, runs migrations, and builds the frontend assets.
+   ```bash
+   composer run setup
+   ```
+   *Note: Make sure your database credentials in the newly created `.env` file are correct before running migrations. You may need to create the database manually first.*
+
+3. **Link Storage**:
+   Make sure the public storage directory is linked so uploaded images display correctly.
+   ```bash
+   php artisan storage:link
+   ```
+
+### Running the Application
+
+To start the development environment (which concurrently runs the Laravel server, Vite for frontend asset compilation, queue worker, and logs):
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer run dev
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Visit the application at `http://localhost:8000` or your configured local URL.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🏗️ System Architecture Highlights
 
-## Code of Conduct
+### Database Relationships
+- **Users**: Can create **Events** (1-to-many) and place **Bookings** (1-to-many).
+- **Events**: Belong to a **Category** (many-to-1) and have many **Tags** (many-to-many via `event_tag` pivot).
+- **Bookings**: Pivot representing a User reserving a spot at an Event.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Soft Deletes & Moderation
+When a user deletes their event, it is **Soft Deleted** (`deleted_at` timestamp is set). It is hidden from standard public queries but remains in the database. Site Admins can view these events in the Admin Dashboard and choose to either **Restore** them or **Force Delete** them permanently.
 
-## Security Vulnerabilities
+### Transactional Booking Integrity
+When a user books a ticket, Passage uses `DB::transaction()` paired with `Event::lockForUpdate()` to read and decrement the available ticket count. This ensures that even under heavy concurrent load, the system will never oversell event tickets.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 📚 Documentation
+For an exhaustive, deep-dive into the architectural decisions, database schemas, full request lifecycles, and route maps, please refer to the internal documentation:
+- [`crud_documentation.md`](./crud_documentation.md)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🛡️ Security Vulnerabilities
+If you discover a security vulnerability within Passage, please report it internally. All security vulnerabilities will be promptly addressed.
+
+## 📄 License
+This project is proprietary. All rights reserved.

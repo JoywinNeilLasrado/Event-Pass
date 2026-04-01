@@ -99,6 +99,17 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/events/{event}/promo-codes', [PromoCodeController::class, 'store']);
         Route::delete('/events/{event}/promo-codes/{promoCode}', [PromoCodeController::class, 'destroy']);
     });
+    
+    // Upgrades and KYC (Mobile implementations)
+    Route::post('/upgrade/basic', [UpgradeController::class, 'checkoutBasic']);
+    Route::post('/upgrade/pro', [UpgradeController::class, 'checkoutPro']);
+    Route::post('/upgrade/cancel', [UpgradeController::class, 'cancel']);
+    
+    Route::get('/kyc/setup', [KycController::class, 'setup']);
+    Route::post('/kyc/submit', [KycController::class, 'submit']);
+
+    // Mobile Payment Verification
+    Route::get('/payment/success', [PaymentController::class, 'success']);
 
     // Bookings & Attendee Actions
     Route::get('/my-tickets', [BookingController::class, 'index']);
